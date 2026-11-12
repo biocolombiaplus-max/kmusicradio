@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kmusic Radio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Kmusic Radio: música en vivo 24/7, programas, ranking, videos y entretenimiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: noche de cabina. Fondo tinta, bandas de tres rayas tomadas del logo,
+   ámbar = energía/CTA, azul eléctrico = marca/estructura. Un solo look oscuro. */
+:root{
+  --ink:#07081a; --surface:#0f1130; --surface-2:#161a44; --line:#262a5c;
+  --fg:#f3f4ff; --muted:#a3a8d4;
+  --amber:#ffa914; --amber-deep:#ff7a00; --blue:#3d5bff; --blue-bright:#7d95ff; --live:#ff3d5a;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --stripes-amber:repeating-linear-gradient(90deg,var(--amber) 0 6px,transparent 6px 10px);
+  --stripes-blue:repeating-linear-gradient(90deg,var(--blue) 0 6px,transparent 6px 10px);
+  --r:18px; --wrap:1200px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;margin:0;overflow-x:hidden;padding-bottom:96px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--ink)}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:28px;height:10px;background:var(--stripes-amber);background-size:10px 100%;opacity:.9}
+.sec{padding-block:88px}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:36px}
+.sec-head h2{font-size:clamp(28px,4.4vw,48px);margin-top:12px}
+.sec-head p{color:var(--muted);max-width:46ch}
+.btn{display:inline-flex;align-items:center;gap:10px;font:800 15px/1 var(--body);padding:16px 24px;border-radius:999px;border:0;cursor:pointer;text-decoration:none;transition:transform .2s,box-shadow .2s,background .2s}
+.btn:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--blue-bright);outline-offset:3px}
+.btn-amber{background:var(--amber);color:#1a0d00;box-shadow:0 10px 30px -10px var(--amber)}
+.btn-amber:hover{transform:translateY(-2px);box-shadow:0 16px 40px -10px var(--amber)}
+.btn-ghost{background:transparent;color:var(--fg);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--blue-bright)}
+.link-more{font-weight:800;color:var(--blue-bright);text-decoration:none;white-space:nowrap}
+.link-more:hover{text-decoration:underline}
+
+/* NAV */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in srgb,var(--ink) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:24px;height:72px}
+.nav-logo img{height:44px;width:auto;display:block}
+.nav-links{display:flex;gap:26px;margin-left:auto;list-style:none;padding:0;margin-block:0}
+.nav-links a{text-decoration:none;font-weight:700;font-size:14px;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--fg)}
+.live-pill{display:inline-flex;align-items:center;gap:8px;background:var(--live);color:#fff;font:700 12px/1 var(--mono);letter-spacing:.1em;padding:9px 14px;border-radius:999px;border:0;cursor:pointer}
+.dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+.menu-btn{display:none;background:none;border:1px solid var(--line);color:var(--fg);border-radius:12px;width:44px;height:44px;font-size:20px;cursor:pointer}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+#waves{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 85% 30%,rgba(61,91,255,.35),transparent 70%),radial-gradient(40% 50% at 10% 90%,rgba(255,169,20,.18),transparent 70%);pointer-events:none}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding-block:72px 80px}
+.hero h1{font-size:clamp(40px,7vw,88px);font-weight:900;margin:18px 0 22px}
+.hero h1 .k{color:var(--amber)}
+.hero h1 .outline{-webkit-text-stroke:2px var(--blue-bright);color:transparent}
+.hero-lead{font-size:18px;color:var(--muted);max-width:44ch}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
+.hero-stats{display:flex;gap:36px;flex-wrap:wrap;margin-top:44px;font-family:var(--mono)}
+.hero-stats b{display:block;font-size:26px;color:var(--fg);font-family:var(--display)}
+.hero-stats span{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+
+.np{background:linear-gradient(160deg,var(--surface-2),var(--surface));border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
+.np-top{display:flex;justify-content:space-between;align-items:center;font:700 12px var(--mono);letter-spacing:.1em;color:var(--muted)}
+.np-cover{margin:18px 0;aspect-ratio:1;max-width:100%;border-radius:20px;position:relative;overflow:hidden}
+.np-cover .art-k{bottom:auto;top:8%}
+.np-cover canvas{position:absolute;left:0;bottom:0;width:100%;height:42%}
+.np-title{font:800 22px/1.2 var(--body)}
+.np-artist{color:var(--muted)}
+.np-row{display:flex;align-items:center;gap:14px;margin-top:16px}
+.play-big{width:64px;height:64px;border-radius:50%;border:0;background:var(--amber);color:#1a0d00;cursor:pointer;display:grid;place-items:center;flex:none;box-shadow:0 0 0 0 rgba(255,169,20,.6);transition:transform .2s}
+.play-big:hover{transform:scale(1.06)}
+.playing .play-big{animation:ring 1.6s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,169,20,.55)}100%{box-shadow:0 0 0 22px rgba(255,169,20,0)}}
+.np-next{font-size:13px;color:var(--muted);min-width:0}
+.np-next b{color:var(--fg);display:block}
+
+/* COVER ART (generada, sin fotos) */
+.art{position:relative;overflow:hidden;background:var(--c1)}
+.art::before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 30% 30%,var(--c2),transparent 60%),repeating-radial-gradient(circle at 110% 110%,transparent 0 14px,rgba(255,255,255,.14) 14px 18px)}
+.art .art-k{position:absolute;left:10%;bottom:8%;font:900 clamp(18px,4vw,34px)/0.95 var(--display);color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.35);max-width:80%}
+
+/* TICKER */
+.ticker{background:var(--amber);color:#160b00;overflow:hidden;white-space:nowrap;border-block:1px solid var(--amber-deep)}
+.ticker-track{display:inline-flex;gap:40px;padding-block:14px;animation:marquee 38s linear infinite;font:800 15px var(--display);text-transform:uppercase}
+.ticker-track span::after{content:"///";margin-left:40px;opacity:.5}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+/* PROGRAMACIÓN */
+.schedule{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.show{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.show.on{border-color:var(--amber);background:linear-gradient(180deg,rgba(255,169,20,.12),var(--surface) 60%)}
+.show .time{font:700 13px var(--mono);color:var(--blue-bright);font-variant-numeric:tabular-nums;display:flex;justify-content:space-between;align-items:center}
+.show .badge-on{background:var(--live);color:#fff;font-size:11px;padding:4px 8px;border-radius:6px;letter-spacing:.08em}
+.show h3{font-size:19px}
+.show .host{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);margin-top:auto}
+.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:800 13px var(--display);color:#fff;flex:none}
+.days{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.days button{font:700 13px var(--mono);background:var(--surface);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:9px 16px;cursor:pointer}
+.days button[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* TOP */
+.top-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 40px}
+.track{display:grid;grid-template-columns:44px 56px 1fr auto;gap:16px;align-items:center;padding:10px;border-radius:14px;transition:background .2s}
+.track:hover{background:var(--surface)}
+.track .pos{font:900 28px var(--display);color:var(--line);text-align:center;font-variant-numeric:tabular-nums}
+.track:nth-child(-n+3) .pos{color:var(--amber)}
+.track .art{width:56px;height:56px;border-radius:10px}
+.track .t{font-weight:800;line-height:1.25;min-width:0}
+.track .a{color:var(--muted);font-size:14px}
+.trend{font:700 12px var(--mono)}
+.up{color:#3ee08f}.down{color:var(--live)}.new{color:var(--amber)}
+.mini-play{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--fg);cursor:pointer;display:grid;place-items:center}
+.mini-play:hover{background:var(--blue);border-color:var(--blue)}
+.track-meta{display:flex;align-items:center;gap:14px}
+
+/* VIDEOS */
+.videos{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:16px}
+.video{position:relative;border-radius:var(--r);overflow:hidden;cursor:pointer;aspect-ratio:16/9;max-width:100%;border:1px solid var(--line);display:block;text-decoration:none;color:#fff}
+.video.feature{grid-row:span 2;aspect-ratio:auto;min-height:340px}
+.video .art{position:absolute;inset:0}
+.video img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video .shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(7,8,26,.92))}
+.video .vplay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.16);backdrop-filter:blur(8px);display:grid;place-items:center;border:1.5px solid rgba(255,255,255,.5);transition:transform .2s,background .2s}
+.video:hover .vplay{transform:translate(-50%,-50%) scale(1.1);background:var(--live);border-color:var(--live)}
+.video .vinfo{position:absolute;left:18px;right:18px;bottom:16px}
+.video .vinfo h3{font-size:clamp(15px,1.6vw,20px)}
+.video.feature .vinfo h3{font-size:clamp(20px,2.6vw,32px)}
+.video .vtag{display:inline-block;font:700 11px var(--mono);letter-spacing:.1em;background:var(--live);padding:4px 8px;border-radius:6px;margin-bottom:8px}
+.video .dur{position:absolute;top:14px;right:14px;font:700 12px var(--mono);background:rgba(0,0,0,.6);padding:4px 8px;border-radius:6px}
+
+/* LOCUTORES */
+.hosts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.host-card{border-radius:var(--r);overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+.host-card .art{aspect-ratio:4/5;max-width:100%}
+.host-card .art .art-k{font-size:clamp(40px,6vw,72px)}
+.host-card .hc-body{padding:16px 18px 20px}
+.host-card h3{font-size:17px}
+.host-card p{color:var(--muted);font-size:14px}
+
+/* NOTICIAS */
+.news{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.news-card{text-decoration:none;display:flex;flex-direction:column;gap:14px}
+.news-card .art{aspect-ratio:3/2;max-width:100%;border-radius:var(--r)}
+.news-card .cat{font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--blue-bright)}
+.news-card h3{font:800 20px/1.25 var(--body)}
+.news-card:hover h3{color:var(--amber)}
+.news-card time{font:500 13px var(--mono);color:var(--muted)}
+
+/* APP + SOCIAL BAND */
+.band{background:var(--blue);position:relative;overflow:hidden}
+.band::before{content:"";position:absolute;right:-120px;top:-120px;width:520px;height:520px;border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 22px,rgba(255,255,255,.12) 22px 30px)}
+.band .wrap{position:relative;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;padding-block:72px}
+.band h2{font-size:clamp(28px,4.4vw,52px)}
+.band p{color:#dfe4ff;margin-top:14px;max-width:46ch}
+.band .eyebrow{color:#fff}
+.band .eyebrow::before{background:repeating-linear-gradient(90deg,#fff 0 6px,transparent 6px 10px)}
+.stores{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.store{background:#06071a;color:#fff;text-decoration:none;border-radius:14px;padding:12px 20px;display:flex;flex-direction:column;line-height:1.2;min-width:170px}
+.store small{font-size:11px;opacity:.7}.store b{font-size:17px}
+.socials{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.social{background:rgba(6,7,26,.35);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:16px;text-decoration:none;color:#fff;display:flex;flex-direction:column;gap:2px;transition:background .2s,transform .2s}
+.social:hover{background:#06071a;transform:translateY(-3px)}
+.social b{font-family:var(--display);font-size:15px}
+.social span{font:500 12px var(--mono);opacity:.8}
+
+/* PAUTA */
+.ads{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.ads-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.stat b{display:block;font:900 clamp(26px,3.6vw,40px) var(--display);color:var(--amber);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:14px}
+.note{font:500 12px var(--mono);color:var(--muted);margin-top:12px}
+.ads ul{list-style:none;padding:0;margin:22px 0 30px;display:grid;gap:10px}
+.ads li{display:flex;gap:12px;align-items:baseline}
+.ads li::before{content:"";flex:none;width:20px;height:8px;background:var(--stripes-blue);background-size:10px 100%}
+
+/* FOOTER */
+footer{border-top:1px solid var(--line);padding-block:56px 32px;background:#05061a}
+.foot{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.4fr;gap:32px}
+.foot img{height:56px;width:auto}
+.foot h4{font:700 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.foot ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.foot a{text-decoration:none;color:var(--fg);font-size:15px}
+.foot a:hover{color:var(--amber)}
+.foot p{color:var(--muted);font-size:14px;margin-top:14px;max-width:34ch}
+.newsletter{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.newsletter input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);color:var(--fg);border-radius:999px;padding:13px 18px;font:500 15px var(--body)}
+.newsletter .btn{padding:13px 20px}
+.copy{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:40px;padding-top:22px;color:var(--muted);font:500 13px var(--mono)}
+
+/* PLAYER FIJO */
+.player{position:fixed;left:0;right:0;bottom:0;z-index:55;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.player::before{content:"";position:absolute;top:-1px;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--amber),var(--blue));transform-origin:left;transform:scaleX(0);transition:transform .6s}
+.playing .player::before{transform:scaleX(1)}
+.player .wrap{display:flex;align-items:center;gap:16px;height:80px}
+.player .art{width:52px;height:52px;border-radius:12px;flex:none}
+.p-info{min-width:0;flex:1}
+.p-info b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-info span{font-size:13px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-btn{width:52px;height:52px;border-radius:50%;border:0;background:var(--amber);color:#1a0d00;cursor:pointer;display:grid;place-items:center;flex:none}
+.bars{display:flex;gap:3px;align-items:end;height:26px;flex:none}
+.bars i{width:4px;background:var(--blue-bright);border-radius:2px;height:20%;transition:height .3s}
+.playing .bars i{animation:eq .9s ease-in-out infinite alternate}
+.bars i:nth-child(2){animation-delay:-.3s}.bars i:nth-child(3){animation-delay:-.6s}.bars i:nth-child(4){animation-delay:-.15s}.bars i:nth-child(5){animation-delay:-.45s}
+@keyframes eq{0%{height:15%}100%{height:100%}}
+.vol{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.vol input{width:110px;accent-color:var(--amber)}
+.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,20px);opacity:0;background:var(--fg);color:var(--ink);font-weight:700;padding:12px 20px;border-radius:12px;z-index:70;transition:all .3s;pointer-events:none;max-width:calc(100% - 32px);text-align:center;font-size:14px}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1000px){
+  .hero .wrap{grid-template-columns:1fr}
+  .np{max-width:440px}
+  .schedule,.hosts{grid-template-columns:repeat(2,1fr)}
+  .top-grid,.ads,.band .wrap{grid-template-columns:1fr}
+  .videos{grid-template-columns:1fr 1fr}
+  .video.feature{grid-column:span 2;grid-row:auto;aspect-ratio:16/9;min-height:0}
+  .foot{grid-template-columns:1fr 1fr}
+  .vol{display:none}
+}
+@media (max-width:760px){
+  .nav-links{display:none;position:absolute;top:72px;left:0;right:0;flex-direction:column;gap:0;background:var(--ink);border-bottom:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .nav-links.open{display:flex}
+  .nav-links a{display:block;padding-block:14px;border-top:1px solid var(--line);font-size:16px}
+  .menu-btn{display:block;margin-left:auto}
+  .nav .live-pill{order:2}
+  .sec{padding-block:64px}
+  .news,.videos{grid-template-columns:1fr}
+  .video.feature{grid-column:auto}
+  .socials{grid-template-columns:repeat(2,1fr)}
+  .foot{grid-template-columns:1fr}
+  .track{grid-template-columns:32px 48px 1fr auto;gap:12px}
+  .track .art{width:48px;height:48px}
+  .trend{display:none}
+}
+@media (max-width:440px){.schedule,.hosts{grid-template-columns:1fr}.hero-stats{gap:22px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="nav-logo" href="#inicio" aria-label="Kmusic Radio, inicio"><img src="assets/logo-dark.png" alt="Kmusic Radio"></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#programacion">Programación</a></li>
+      <li><a href="#top">K-Top 10</a></li>
+      <li><a href="#videos">Videos</a></li>
+      <li><a href="#locutores">Locutores</a></li>
+      <li><a href="#noticias">Noticias</a></li>
+      <li><a href="#pauta">Anúnciate</a></li>
+    </ul>
+    <button class="live-pill" data-play type="button"><span class="dot"></span>EN VIVO</button>
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<main id="inicio">
+<section class="hero">
+  <canvas id="waves" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Radio online · 24/7 · desde Colombia para el mundo</p>
+      <h1>Sube el volumen.<br>Esto es <span class="k">K</span><span class="outline">music</span>.</h1>
+      <p class="hero-lead">Los éxitos que están sonando, los que vienen y los que nunca se van. Reggaetón, pop, urbano, electrónica y crossover, con locutores que hablan tu idioma.</p>
+      <div class="hero-cta">
+        <button class="btn btn-amber" data-play type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+          Escuchar en vivo
+        </button>
+        <a class="btn btn-ghost" href="#programacion">Ver programación</a>
+      </div>
+      <div class="hero-stats">
+        <div><b>24/7</b><span>Al aire</span></div>
+        <div><b>+40</b><span>Países oyendo</span></div>
+        <div><b>12</b><span>Programas</span></div>
+      </div>
+    </div>
+
+    <aside class="np" aria-label="Sonando ahora">
+      <div class="np-top"><span>● SONANDO AHORA</span><span id="clock">--:--</span></div>
+      <div class="np-cover art" id="npCover" style="--c1:#3d5bff;--c2:#ff7a00">
+        <span class="art-k" id="npCoverText">Noches de Neón</span>
+        <canvas id="viz" aria-hidden="true"></canvas>
+      </div>
+      <div class="np-title" id="npTitle">Noches de Neón</div>
+      <div class="np-artist" id="npArtist">Valen Ríos ft. DJ Koda</div>
+      <div class="np-row">
+        <button class="play-big" data-play type="button" aria-label="Reproducir en vivo">
+          <svg class="ic-play" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+        </button>
+        <div class="np-next"><b>A continuación</b>Kali · “Volver a los 17”</div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker"></div></div>
+
+<section class="sec" id="programacion">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="eyebrow">Programación</p><h2>Tu día suena así</h2></div>
+      <p>El programa marcado está al aire en este momento, según tu hora local.</p>
+    </div>
+    <div class="days" id="days" role="group" aria-label="Día de la semana"></div>
+    <div class="schedule" id="schedule"></div>
+  </div>
+</section>
+
+<section class="sec" id="top" style="background:linear-gradient(180deg,var(--ink),var(--surface) 60%,var(--ink))">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="eyebrow">Semana 46 · 2026</p><h2>K-Top 10</h2></div>
+      <a class="link-more" href="#top">Vota por tu canción →</a>
+    </div>
+    <div class="top-grid" id="topList"></div>
+  </div>
+</section>
+
+<section class="sec" id="videos">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="eyebrow">K-TV</p><h2>Videos, sesiones y entrevistas</h2></div>
+      <a class="link-more" id="ytChannel" href="#" target="_blank" rel="noopener">Ir al canal de YouTube →</a>
+    </div>
+    <div class="videos" id="videoGrid"></div>
+  </div>
+</section>
+
+<section class="sec" id="locutores" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="eyebrow">El equipo</p><h2>Las voces de K</h2></div>
+      <p>Ellos te acompañan desde la mañana hasta la madrugada.</p>
+    </div>
+    <div class="hosts" id="hosts"></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Llévala contigo</p>
+      <h2>Kmusic en tu bolsillo, en tu carro y en tu parlante.</h2>
+      <p>Escúchanos desde la app, Alexa o cualquier navegador. Síguenos para enterarte primero de lanzamientos, concursos y entradas a conciertos.</p>
+      <div class="stores">
+        <a class="store" href="#" data-link="appstore"><small>Descárgala en</small><b>App Store</b></a>
+        <a class="store" href="#" data-link="googleplay"><small>Disponible en</small><b>Google Play</b></a>
+      </div>
+    </div>
+    <div class="socials" id="socials"></div>
+  </div>
+</section>
+
+<section class="sec" id="noticias">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><p class="eyebrow">K-News</p><h2>Lo que se mueve en la música</h2></div>
+      <a class="link-more" href="#noticias">Todas las noticias →</a>
+    </div>
+    <div class="news" id="news"></div>
+  </div>
+</section>
+
+<section class="sec" id="pauta" style="background:var(--surface);border-block:1px solid var(--line)">
+  <div class="wrap ads">
+    <div>
+      <p class="eyebrow">Pauta publicitaria</p>
+      <h2 style="font-size:clamp(28px,4.4vw,48px);margin-top:12px">Tu marca, al oído de una generación.</h2>
+      <ul>
+        <li>Cuñas y menciones en vivo dentro de los programas.</li>
+        <li>Patrocinio de secciones, rankings y concursos.</li>
+        <li>Contenido para redes y video con nuestros locutores.</li>
+        <li>Activaciones en eventos y conciertos.</li>
+      </ul>
+      <a class="btn btn-amber" href="#" data-link="whatsapp">Pedir tarifas por WhatsApp</a>
+    </div>
+    <div>
+      <div class="ads-stats">
+        <div class="stat"><b>180K</b><span>Oyentes mensuales</span></div>
+        <div class="stat"><b>18–34</b><span>Edad principal de la audiencia</span></div>
+        <div class="stat"><b>2.1M</b><span>Alcance en redes al mes</span></div>
+        <div class="stat"><b>47 min</b><span>Escucha promedio por sesión</span></div>
+      </div>
+      <p class="note">* Cifras de ejemplo para el boceto. Se reemplazan con los datos reales de la emisora.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <img src="assets/logo-dark.png" alt="Kmusic Radio">
+        <p>La emisora online que pone a sonar lo nuevo antes que nadie.</p>
+      </div>
+      <div>
+        <h4>Emisora</h4>
+        <ul><li><a href="#programacion">Programación</a></li><li><a href="#top">K-Top 10</a></li><li><a href="#locutores">Locutores</a></li><li><a href="#videos">Videos</a></li></ul>
+      </div>
+      <div>
+        <h4>Síguenos</h4>
+        <ul id="footSocial"></ul>
+      </div>
+      <div>
+        <h4>Boletín semanal</h4>
+        <form class="newsletter" id="newsForm">
+          <label for="newsEmail" style="position:absolute;left:-9999px">Correo electrónico</label>
+          <input id="newsEmail" type="email" placeholder="tu@correo.com" required>
+          <button class="btn btn-amber" type="submit">Suscribirme</button>
+        </form>
+        <p>Estrenos, concursos y entradas. Un correo a la semana.</p>
+      </div>
+    </div>
+    <div class="copy"><span>© 2026 Kmusic Radio. Todos los derechos reservados.</span><span>Hecho con ritmo en Colombia</span></div>
+  </div>
+</footer>
+
+<div class="player" role="region" aria-label="Reproductor en vivo">
+  <div class="wrap">
+    <div class="art" style="--c1:#3d5bff;--c2:#ffa914"></div>
+    <div class="p-info"><b id="pTitle">Kmusic Radio · En vivo</b><span id="pSub">Toca play para escuchar la señal</span></div>
+    <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="vol"><span aria-hidden="true">🔊</span><label for="vol" style="position:absolute;left:-9999px">Volumen</label><input id="vol" type="range" min="0" max="1" step="0.05" value="0.8"></div>
+    <button class="p-btn" data-play type="button" aria-label="Reproducir en vivo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+    </button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* =========================================================
+   CONFIG: todo lo que el futuro módulo administrador editará.
+   Hoy son datos de ejemplo; mañana vendrán de la base de datos.
+   ========================================================= */
+const CONFIG = {
+  streamUrl: "",              // ej: https://stream.zeno.fm/xxxx o https://tuservidor:8000/live
+  embedVideos: true,          // reproduce YouTube dentro de la página
+  links: {
+    instagram: "https://instagram.com/",
+    tiktok: "https://tiktok.com/",
+    youtube: "https://youtube.com/",
+    facebook: "https://facebook.com/",
+    x: "https://x.com/",
+    spotify: "https://open.spotify.com/",
+    whatsapp: "https://wa.me/",
+    appstore: "#", googleplay: "#"
+  },
+  videos: [
+    {title:"Sesión acústica en cabina: Valen Ríos", tag:"ESTRENO", dur:"12:40", youtubeId:"", c1:"#ff3d5a", c2:"#3d5bff"},
+    {title:"K-Talks: el futuro del urbano", tag:"ENTREVISTA", dur:"24:05", youtubeId:"", c1:"#3d5bff", c2:"#21d4b8"},
+    {title:"Backstage Festival Estéreo Picnic", tag:"EVENTO", dur:"08:12", youtubeId:"", c1:"#ff7a00", c2:"#7b2cff"},
+    {title:"Top 5 de la semana en 60 segundos", tag:"SHORTS", dur:"01:00", youtubeId:"", c1:"#7b2cff", c2:"#ffa914"},
+    {title:"Reto K: canta y gana entradas", tag:"CONCURSO", dur:"03:30", youtubeId:"", c1:"#0fa968", c2:"#3d5bff"}
+  ]
+};
+
+const PALETTES=[["#3d5bff","#ff7a00"],["#ff3d5a","#ffa914"],["#7b2cff","#21d4b8"],["#0fa968","#3d5bff"],["#ff7a00","#7b2cff"],["#1b1f6b","#ff3d5a"],["#21d4b8","#3d5bff"],["#ffa914","#ff3d5a"]];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const art=(i,txt="",cls="")=>{const [a,b]=PALETTES[i%PALETTES.length];return `<div class="art ${cls}" style="--c1:${a};--c2:${b}">${txt?`<span class="art-k">${esc(txt)}</span>`:""}</div>`};
+const ic=n=>`<svg width="${n}" height="${n}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>`;
+const PLAY=ic(16);
+const PAUSE='<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+
+/* Ticker */
+const tick=["Reggaetón","Pop latino","Urbano","Electrónica","Crossover","Throwback 2000s","Afrobeat","Indie","Estrenos cada viernes"];
+$("#ticker").innerHTML=[...tick,...tick].map(t=>`<span>${t}</span>`).join("");
+
+/* Programación */
+const SHOWS=[
+  {s:5,e:9,n:"K-Despierta",h:"Laura Méndez",d:"Noticias, humor y los éxitos para arrancar."},
+  {s:9,e:12,n:"Modo Oficina",h:"Andrés Cubillos",d:"Música sin pausas para concentrarte."},
+  {s:12,e:15,n:"La Hora K",h:"Sofi Duarte",d:"Chismes de la farándula y peticiones en vivo."},
+  {s:15,e:18,n:"Ruta 15",h:"Mateo Gil",d:"El regreso a casa con el top del momento."},
+  {s:18,e:21,n:"K-Top en Vivo",h:"Valen Ríos",d:"El conteo de la semana con invitados."},
+  {s:21,e:24,n:"Noches de Neón",h:"DJ Koda",d:"Mezclas electrónicas y urbano para la noche."},
+  {s:0,e:3,n:"After K",h:"DJ Koda",d:"Sets extendidos para los que no duermen."},
+  {s:3,e:5,n:"Madrugada K",h:"Automático",d:"Lo mejor del catálogo, sin interrupciones."}
+];
+const WEEK=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const pad=n=>String(n).padStart(2,"0");
+let today=new Date().getDay(), selDay=today;
+function renderDays(){
+  $("#days").innerHTML=[1,2,3,4,5,6,0].map(d=>`<button type="button" aria-pressed="${d===selDay}" data-day="${d}">${d===today?"Hoy":WEEK[d]}</button>`).join("");
+}
+function renderSchedule(){
+  const h=new Date().getHours();
+  const list=[...SHOWS].sort((a,b)=>((a.s-h+24)%24)-((b.s-h+24)%24)||0);
+  const ordered=selDay===today?SHOWS.filter(x=>h>=x.s&&h<x.e).concat(list.filter(x=>!(h>=x.s&&h<x.e))).slice(0,4):SHOWS.slice(0,4);
+  $("#schedule").innerHTML=ordered.map((x,i)=>{
+    const on=selDay===today&&h>=x.s&&h<x.e;
+    const ini=x.h.split(" ").map(w=>w[0]).join("").slice(0,2);
+    const [a,b]=PALETTES[SHOWS.indexOf(x)%PALETTES.length];
+    return `<article class="show${on?" on":""}">
+      <div class="time"><span>${pad(x.s)}:00 – ${pad(x.e%24)}:00</span>${on?'<span class="badge-on">AL AIRE</span>':""}</div>
+      <h3>${x.n}</h3><p style="color:var(--muted);font-size:14px">${x.d}</p>
+      <div class="host"><span class="avatar" style="background:linear-gradient(135deg,${a},${b})">${ini}</span>${x.h}</div>
+    </article>`}).join("");
+}
+$("#days").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;selDay=+b.dataset.day;renderDays();renderSchedule()});
+renderDays();renderSchedule();
+
+/* Top 10 */
+const TOP=[
+  ["Noches de Neón","Valen Ríos ft. DJ Koda","up",2],["Volver a los 17","Kali","new",0],["Medellín 3AM","Los Alterados","down",1],
+  ["Piel Canela 2.0","Mara Sol","up",3],["Fuego Lento","Tavo & Nía","up",1],["Cartagena Mood","Orilla","down",2],
+  ["Sin Señal","Juanjo Prado","new",0],["Bailando Sola","Luna Vega","up",4],["Amanecer","Koral","down",1],["Modo Avión","Nico Ferrer","up",2]
+];
+$("#topList").innerHTML=TOP.map(([t,a,tr,n],i)=>`
+  <div class="track">
+    <span class="pos">${i+1}</span>${art(i)}
+    <div style="min-width:0"><div class="t">${t}</div><div class="a">${a}</div></div>
+    <div class="track-meta"><span class="trend ${tr}">${tr==="new"?"NUEVO":(tr==="up"?"▲ ":"▼ ")+(n||"")}</span>
+    <button class="mini-play" type="button" aria-label="Escuchar ${esc(t)}" data-preview="${esc(t)}">${PLAY}</button></div>
+  </div>`).join("");
+
+/* Videos */
+function renderVideos(){
+  $("#videoGrid").innerHTML=CONFIG.videos.map((v,i)=>{
+    const thumb=v.youtubeId?`<img src="https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg" alt="" loading="lazy" onerror="this.remove()">`:"";
+    return `<a class="video${i===0?" feature":""}" href="${v.youtubeId?"https://youtu.be/"+v.youtubeId:CONFIG.links.youtube}" target="_blank" rel="noopener" data-vid="${v.youtubeId||""}">
+      <div class="art" style="--c1:${v.c1};--c2:${v.c2}"></div>${thumb}<div class="shade"></div>
+      <span class="dur">${v.dur}</span>
+      <span class="vplay">${ic(26)}</span>
+      <div class="vinfo"><span class="vtag">${v.tag}</span><h3>${esc(v.title)}</h3></div>
+    </a>`}).join("");
+}
+renderVideos();
+$("#videoGrid").addEventListener("click",e=>{
+  const a=e.target.closest(".video");if(!a||!CONFIG.embedVideos||!a.dataset.vid)return;
+  e.preventDefault();
+  a.innerHTML=`<iframe src="https://www.youtube.com/embed/${a.dataset.vid}?autoplay=1" title="Video de YouTube" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+});
+$("#ytChannel").href=CONFIG.links.youtube;
+
+/* Locutores */
+const HOSTS=[["Laura Méndez","K-Despierta · 5 a 9 am"],["Sofi Duarte","La Hora K · 12 a 3 pm"],["Valen Ríos","K-Top en Vivo · 6 a 9 pm"],["DJ Koda","Noches de Neón · 9 pm a 3 am"]];
+$("#hosts").innerHTML=HOSTS.map(([n,p],i)=>`<article class="host-card">${art(i+2,n.split(" ").map(w=>w[0]).join(""))}<div class="hc-body"><h3>${n}</h3><p>${p}</p></div></article>`).join("");
+
+/* Noticias */
+const NEWS=[
+  ["Estrenos","Los 10 lanzamientos latinos que tienes que oír este viernes","12 nov 2026"],
+  ["Conciertos","Calendario de conciertos en Colombia para diciembre","10 nov 2026"],
+  ["Concurso","Gana dos boletas para el festival de fin de año con Kmusic","8 nov 2026"]
+];
+$("#news").innerHTML=NEWS.map(([c,t,d],i)=>`<a class="news-card" href="#noticias">${art(i+4,c)}<span class="cat">${c}</span><h3>${t}</h3><time>${d}</time></a>`).join("");
+
+/* Redes */
+const SOC=[["instagram","Instagram","@kmusicradio"],["tiktok","TikTok","@kmusicradio"],["youtube","YouTube","K-TV"],["facebook","Facebook","Kmusic Radio"],["spotify","Spotify","Playlists K"],["whatsapp","WhatsApp","Escribe a cabina"]];
+$("#socials").innerHTML=SOC.map(([k,n,h])=>`<a class="social" href="${CONFIG.links[k]}" target="_blank" rel="noopener"><b>${n}</b><span>${h}</span></a>`).join("");
+$("#footSocial").innerHTML=SOC.map(([k,n])=>`<li><a href="${CONFIG.links[k]}" target="_blank" rel="noopener">${n}</a></li>`).join("");
+document.querySelectorAll("[data-link]").forEach(a=>{const u=CONFIG.links[a.dataset.link];if(u&&u!=="#"){a.href=u;a.target="_blank";a.rel="noopener"}});
+
+/* Menú móvil */
+$("#menuBtn").addEventListener("click",()=>{const o=$("#navLinks").classList.toggle("open");$("#menuBtn").setAttribute("aria-expanded",o)});
+$("#navLinks").addEventListener("click",e=>{if(e.target.tagName==="A"){$("#navLinks").classList.remove("open");$("#menuBtn").setAttribute("aria-expanded","false")}});
+
+/* Toast */
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),3200)}
+$("#newsForm").addEventListener("submit",e=>{e.preventDefault();toast("Listo, quedaste suscrito al boletín.");e.target.reset()});
+document.querySelectorAll("[data-preview]").forEach(b=>b.addEventListener("click",()=>toast("Vista previa de “"+b.dataset.preview+"”: se conecta al subir el audio.")));
+
+/* Reproductor en vivo */
+const audio=new Audio();audio.preload="none";
+let playing=false;
+$("#vol").addEventListener("input",e=>audio.volume=+e.target.value);
+function setPlaying(p){
+  playing=p;document.body.classList.toggle("playing",p);
+  document.querySelectorAll(".p-btn,.play-big").forEach(b=>{b.innerHTML=p?PAUSE:ic(24);b.setAttribute("aria-label",p?"Pausar":"Reproducir en vivo")});
+  $("#pTitle").textContent=p?$("#npTitle").textContent+" · "+$("#npArtist").textContent:"Kmusic Radio · En vivo";
+  $("#pSub").textContent=p?"En vivo ahora · "+(SHOWS.find(x=>{const h=new Date().getHours();return h>=x.s&&h<x.e})||SHOWS[0]).n:"Toca play para escuchar la señal";
+}
+document.querySelectorAll("[data-play]").forEach(b=>b.addEventListener("click",()=>{
+  if(playing){audio.pause();setPlaying(false);return}
+  if(CONFIG.streamUrl){audio.src=CONFIG.streamUrl;audio.play().then(()=>setPlaying(true)).catch(()=>toast("No pudimos conectar la señal. Intenta de nuevo."))}
+  else{setPlaying(true);toast("Modo demostración: aquí sonará la señal en vivo cuando se configure el link del stream.")}
+}));
+
+/* Reloj + “sonando ahora” rotativo */
+function clock(){const d=new Date();$("#clock").textContent=pad(d.getHours())+":"+pad(d.getMinutes())}
+clock();setInterval(clock,15000);
+let np=0;setInterval(()=>{np=(np+1)%5;const [t,a]=TOP[np];const [c1,c2]=PALETTES[np];
+  $("#npTitle").textContent=t;$("#npArtist").textContent=a;$("#npCoverText").textContent=t;
+  $("#npCover").style.setProperty("--c1",c1);$("#npCover").style.setProperty("--c2",c2);
+  if(playing)setPlaying(true)},12000);
+
+/* Visualizador en la portada */
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const viz=$("#viz"),vx=viz.getContext("2d");
+function sizeCanvas(c){const r=c.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);c.width=r.width*dpr;c.height=r.height*dpr;return dpr}
+let vdpr=sizeCanvas(viz);
+/* Ondas de fondo con las tres rayas del logo */
+const wv=$("#waves"),wx=wv.getContext("2d");let wdpr=sizeCanvas(wv);
+addEventListener("resize",()=>{vdpr=sizeCanvas(viz);wdpr=sizeCanvas(wv)});
+function frame(t){
+  const W=viz.width,H=viz.height,N=32,bw=W/N;vx.clearRect(0,0,W,H);
+  for(let i=0;i<N;i++){
+    const amp=playing?(.35+.65*Math.abs(Math.sin(t/260+i*.7)*Math.cos(t/410+i*.3))):.08+.04*Math.sin(t/900+i);
+    const h=amp*H;vx.fillStyle="rgba(255,255,255,.85)";vx.fillRect(i*bw+bw*.2,H-h,bw*.6,h);
+  }
+  const w=wv.width,h=wv.height;wx.clearRect(0,0,w,h);wx.lineWidth=3*wdpr;
+  const speed=playing?1:.4;
+  [["#3d5bff",0],["#ffa914",1]].forEach(([col,k])=>{
+    wx.strokeStyle=col;
+    for(let s=0;s<3;s++){
+      wx.globalAlpha=.55-s*.12;wx.beginPath();
+      const base=h*(k?.78:.62)+s*10*wdpr;
+      for(let x=0;x<=w;x+=8*wdpr){
+        const y=base+Math.sin(x/(170*wdpr)+t/1600*speed+k*2)*(playing?46:28)*wdpr+Math.sin(x/(70*wdpr)+t/900*speed)*8*wdpr;
+        x?wx.lineTo(x,y):wx.moveTo(x,y);
+      }
+      wx.stroke();
+    }
+  });
+  wx.globalAlpha=1;
+  if(!reduce)requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
