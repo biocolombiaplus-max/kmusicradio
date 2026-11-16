@@ -1,0 +1,96 @@
+{
+  "brand": { "name": "Kmusic Radio", "slogan": "La emisora online que pone a sonar lo nuevo antes que nadie.", "logo": "/assets/logo-dark.png", "accent": "#ffa914", "accent2": "#3d5bff" },
+  "seo": { "title": "Kmusic Radio · Música en vivo 24/7", "description": "Kmusic Radio: música en vivo 24/7, programas, ranking, videos y entretenimiento.", "ogImage": "" },
+  "stream": { "url": "", "nowPlayingUrl": "", "liveVideoUrl": "" },
+  "sections": { "schedule": true, "top": true, "live": true, "videos": true, "hosts": true, "events": true, "news": true, "app": true, "ads": true, "sponsors": true, "banners": true },
+  "hero": {
+    "eyebrow": "Radio online · 24/7 · desde Colombia para el mundo",
+    "title": "Sube el volumen. Esto es",
+    "highlight": "Kmusic",
+    "lead": "Los éxitos que están sonando, los que vienen y los que nunca se van. Reggaetón, pop, urbano, electrónica y crossover, con locutores que hablan tu idioma.",
+    "ctaText": "Escuchar en vivo",
+    "bgImage": "", "bgVideo": "",
+    "stats": [ { "value": "24/7", "label": "Al aire" }, { "value": "+40", "label": "Países oyendo" }, { "value": "12", "label": "Programas" } ]
+  },
+  "nowPlaying": { "title": "Noches de Neón", "artist": "Valen Ríos ft. DJ Koda", "cover": "", "next": "Kali · “Volver a los 17”" },
+  "ticker": [ { "text": "Reggaetón" }, { "text": "Pop latino" }, { "text": "Urbano" }, { "text": "Electrónica" }, { "text": "Crossover" }, { "text": "Throwback 2000s" }, { "text": "Afrobeat" }, { "text": "Estrenos cada viernes" } ],
+  "schedule": [
+    { "name": "K-Despierta", "host": "Laura Méndez", "start": "05:00", "end": "09:00", "days": [1,2,3,4,5], "description": "Noticias, humor y los éxitos para arrancar.", "image": "" },
+    { "name": "Modo Oficina", "host": "Andrés Cubillos", "start": "09:00", "end": "12:00", "days": [1,2,3,4,5], "description": "Música sin pausas para concentrarte.", "image": "" },
+    { "name": "La Hora K", "host": "Sofi Duarte", "start": "12:00", "end": "15:00", "days": [1,2,3,4,5,6], "description": "Chismes de la farándula y peticiones en vivo.", "image": "" },
+    { "name": "Ruta 15", "host": "Mateo Gil", "start": "15:00", "end": "18:00", "days": [1,2,3,4,5], "description": "El regreso a casa con el top del momento.", "image": "" },
+    { "name": "K-Top en Vivo", "host": "Valen Ríos", "start": "18:00", "end": "21:00", "days": [1,2,3,4,5,6], "description": "El conteo de la semana con invitados.", "image": "" },
+    { "name": "Noches de Neón", "host": "DJ Koda", "start": "21:00", "end": "00:00", "days": [0,1,2,3,4,5,6], "description": "Mezclas electrónicas y urbano para la noche.", "image": "" },
+    { "name": "After K", "host": "DJ Koda", "start": "00:00", "end": "05:00", "days": [0,1,2,3,4,5,6], "description": "Sets extendidos para los que no duermen.", "image": "" },
+    { "name": "Domingo Throwback", "host": "Andrés Cubillos", "start": "09:00", "end": "21:00", "days": [0], "description": "Los clásicos de los 2000 y 2010 todo el día.", "image": "" },
+    { "name": "Sábado de Fiesta", "host": "Mateo Gil", "start": "09:00", "end": "12:00", "days": [6], "description": "Calentando motores para el fin de semana.", "image": "" },
+    { "name": "Ruta Sábado", "host": "Mateo Gil", "start": "15:00", "end": "18:00", "days": [6], "description": "Mix de éxitos sin parar.", "image": "" }
+  ],
+  "top": {
+    "week": "Semana 46 · 2026",
+    "voteUrl": "",
+    "items": [
+      { "title": "Noches de Neón", "artist": "Valen Ríos ft. DJ Koda", "cover": "", "trend": "up", "link": "" },
+      { "title": "Volver a los 17", "artist": "Kali", "cover": "", "trend": "new", "link": "" },
+      { "title": "Medellín 3AM", "artist": "Los Alterados", "cover": "", "trend": "down", "link": "" },
+      { "title": "Piel Canela 2.0", "artist": "Mara Sol", "cover": "", "trend": "up", "link": "" },
+      { "title": "Fuego Lento", "artist": "Tavo & Nía", "cover": "", "trend": "up", "link": "" },
+      { "title": "Cartagena Mood", "artist": "Orilla", "cover": "", "trend": "down", "link": "" },
+      { "title": "Sin Señal", "artist": "Juanjo Prado", "cover": "", "trend": "new", "link": "" },
+      { "title": "Bailando Sola", "artist": "Luna Vega", "cover": "", "trend": "up", "link": "" },
+      { "title": "Amanecer", "artist": "Koral", "cover": "", "trend": "down", "link": "" },
+      { "title": "Modo Avión", "artist": "Nico Ferrer", "cover": "", "trend": "same", "link": "" }
+    ]
+  },
+  "videos": {
+    "channelUrl": "https://youtube.com/",
+    "items": [
+      { "title": "Sesión acústica en cabina: Valen Ríos", "tag": "ESTRENO", "url": "", "cover": "", "duration": "12:40" },
+      { "title": "K-Talks: el futuro del urbano", "tag": "ENTREVISTA", "url": "", "cover": "", "duration": "24:05" },
+      { "title": "Backstage del festival de fin de año", "tag": "EVENTO", "url": "", "cover": "", "duration": "08:12" },
+      { "title": "Top 5 de la semana en 60 segundos", "tag": "SHORTS", "url": "", "cover": "", "duration": "01:00" },
+      { "title": "Reto K: canta y gana entradas", "tag": "CONCURSO", "url": "", "cover": "", "duration": "03:30" }
+    ]
+  },
+  "hosts": [
+    { "name": "Laura Méndez", "program": "K-Despierta · 5 a 9 am", "photo": "", "instagram": "" },
+    { "name": "Sofi Duarte", "program": "La Hora K · 12 a 3 pm", "photo": "", "instagram": "" },
+    { "name": "Valen Ríos", "program": "K-Top en Vivo · 6 a 9 pm", "photo": "", "instagram": "" },
+    { "name": "DJ Koda", "program": "Noches de Neón · 9 pm a 5 am", "photo": "", "instagram": "" }
+  ],
+  "events": [
+    { "title": "K-Fest 2026", "date": "2026-12-12", "place": "Movistar Arena, Bogotá", "image": "", "link": "" },
+    { "title": "Noche Throwback", "date": "2026-12-20", "place": "Teatro Royal Center, Bogotá", "image": "", "link": "" },
+    { "title": "Fiesta de Año Nuevo K", "date": "2026-12-31", "place": "Parque Explora, Medellín", "image": "", "link": "" }
+  ],
+  "news": [
+    { "category": "Estrenos", "title": "Los 10 lanzamientos latinos que tienes que oír este viernes", "date": "2026-11-14", "image": "", "url": "" },
+    { "category": "Conciertos", "title": "Calendario de conciertos en Colombia para diciembre", "date": "2026-11-10", "image": "", "url": "" },
+    { "category": "Concurso", "title": "Gana dos boletas para el festival de fin de año con Kmusic", "date": "2026-11-08", "image": "", "url": "" }
+  ],
+  "banners": [
+    { "image": "", "link": "", "alt": "Espacio publicitario" }
+  ],
+  "sponsors": [
+    { "name": "Tu marca aquí", "logo": "", "link": "" },
+    { "name": "Aliado 2", "logo": "", "link": "" },
+    { "name": "Aliado 3", "logo": "", "link": "" },
+    { "name": "Aliado 4", "logo": "", "link": "" },
+    { "name": "Aliado 5", "logo": "", "link": "" }
+  ],
+  "social": {
+    "instagram": "https://instagram.com/", "tiktok": "https://tiktok.com/", "youtube": "https://youtube.com/",
+    "facebook": "https://facebook.com/", "x": "", "spotify": "https://open.spotify.com/",
+    "whatsapp": "https://wa.me/", "appstore": "", "googleplay": ""
+  },
+  "contact": { "whatsapp": "", "email": "", "phone": "", "address": "Colombia" },
+  "app": { "title": "Kmusic en tu bolsillo, en tu carro y en tu parlante.", "text": "Escúchanos desde la app, Alexa o cualquier navegador. Síguenos para enterarte primero de lanzamientos, concursos y entradas a conciertos.", "image": "" },
+  "ads": {
+    "title": "Tu marca, al oído de una generación.",
+    "bullets": [ { "text": "Cuñas y menciones en vivo dentro de los programas." }, { "text": "Patrocinio de secciones, rankings y concursos." }, { "text": "Contenido para redes y video con nuestros locutores." }, { "text": "Activaciones en eventos y conciertos." } ],
+    "stats": [ { "value": "180K", "label": "Oyentes mensuales" }, { "value": "18–34", "label": "Edad principal de la audiencia" }, { "value": "2.1M", "label": "Alcance en redes al mes" }, { "value": "47 min", "label": "Escucha promedio por sesión" } ],
+    "ctaText": "Pedir tarifas por WhatsApp",
+    "note": "* Cifras de ejemplo. Se reemplazan con los datos reales de la emisora."
+  },
+  "footer": { "copyright": "© 2026 Kmusic Radio. Todos los derechos reservados.", "tagline": "Hecho con ritmo en Colombia" }
+}

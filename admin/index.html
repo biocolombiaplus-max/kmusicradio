@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel Kmusic Radio</title>
+<link rel="icon" href="/assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Panel: barra lateral de secciones · formulario · vista previa en vivo a la derecha */
+:root{
+  --ink:#07081a;--panel:#0d0f2a;--card:#13163a;--field:#0a0c24;--line:#262a5c;--fg:#f3f4ff;--muted:#a3a8d4;
+  --amber:#ffa914;--blue:#3d5bff;--blue-bright:#7d95ff;--ok:#3ee08f;--err:#ff5470;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;--body:"Manrope",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--fg);font:15px/1.5 var(--body)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue-bright);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--blue-bright)}
+.btn-primary{background:var(--amber);border-color:var(--amber);color:#1a0d00}
+.btn-primary:hover{filter:brightness(1.08);border-color:var(--amber)}
+.btn-primary:disabled{opacity:.5;cursor:default}
+.btn-sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn-danger:hover{border-color:var(--err);color:var(--err)}
+
+/* Login */
+.login{min-height:100%;display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));background:radial-gradient(60% 60% at 70% 20%,rgba(61,91,255,.3),transparent),radial-gradient(40% 40% at 20% 90%,rgba(255,169,20,.15),transparent),var(--ink)}
+.login form{width:min(400px,100%);background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:32px;display:grid;gap:16px}
+.login img{height:64px;justify-self:start}
+.login h1{font:900 22px var(--display);margin:0}
+.login p{margin:0;color:var(--muted);font-size:14px}
+.err{color:var(--err);font-size:14px;min-height:1.2em}
+
+/* Layout */
+.app{display:grid;grid-template-columns:230px minmax(0,1fr) minmax(0,1fr);height:100%}
+.app[data-preview="off"]{grid-template-columns:230px minmax(0,1fr) 0}
+.side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.side .brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px}
+.side .brand img{height:34px}
+.side .brand span{font:700 11px var(--mono);letter-spacing:.12em;color:var(--muted)}
+.side nav{overflow-y:auto;padding:6px 10px 16px;display:grid;gap:2px;align-content:start}
+.side nav button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;border-radius:10px;padding:10px 12px;font-weight:700;color:var(--muted);cursor:pointer}
+.side nav button:hover{background:var(--card);color:var(--fg)}
+.side nav button[aria-current="true"]{background:var(--blue);color:#fff}
+.side nav .ico{width:22px;text-align:center}
+.side .side-foot{margin-top:auto;padding:14px;border-top:1px solid var(--line);display:grid;gap:8px}
+
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.topbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.topbar h1{font:900 18px var(--display);margin:0 auto 0 0}
+.status{font:700 12px var(--mono);letter-spacing:.06em;padding:6px 10px;border-radius:999px;background:var(--card);color:var(--muted)}
+.status.dirty{background:rgba(255,169,20,.15);color:var(--amber)}
+.status.ok{background:rgba(62,224,143,.12);color:var(--ok)}
+.form{overflow-y:auto;padding:22px 20px 80px;min-height:0}
+.form-inner{max-width:760px;margin:0 auto;display:grid;gap:18px}
+.intro{color:var(--muted);font-size:14px;margin:0}
+.notice{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--muted)}
+.notice b{color:var(--fg)}
+.notice.warn{border-color:rgba(255,169,20,.5)}
+
+.group{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:14px}
+.group>h2{font:800 15px var(--body);margin:0;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.f{display:grid;gap:6px;min-width:0}
+.f>label,.f>.lbl{font-weight:700;font-size:13px}
+.help{font-size:12px;color:var(--muted)}
+.f input[type=text],.f input[type=url],.f input[type=date],.f input[type=time],.f input[type=email],.f select,.f textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.f textarea{min-height:84px;resize:vertical}
+.f input:focus,.f textarea:focus,.f select:focus{border-color:var(--blue-bright);outline:none}
+.color-row{display:flex;gap:8px;align-items:center}
+.color-row input[type=color]{width:44px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--field);padding:3px}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.toggle input{appearance:none;width:44px;height:26px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;flex:none;transition:background .2s}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle input:checked{background:var(--ok)}
+.toggle input:checked::after{transform:translateX(18px)}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days label{display:flex;align-items:center;gap:6px;background:var(--field);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.days input{accent-color:var(--amber)}
+
+.media{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:start}
+.thumb{width:96px;aspect-ratio:1;border-radius:12px;border:1px dashed var(--line);background:var(--field) center/cover no-repeat;display:grid;place-items:center;font:700 10px var(--mono);color:var(--muted);text-align:center;overflow:hidden}
+.media .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.badge{font:700 11px var(--mono);padding:3px 8px;border-radius:6px;background:var(--card);color:var(--muted)}
+.badge.ok{color:var(--ok)}.badge.bad{color:var(--err)}
+
+.list{display:grid;gap:10px}
+.item{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.item-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.item-head .n{font:700 12px var(--mono);color:var(--muted);width:22px}
+.item-head .mini{width:36px;height:36px;border-radius:8px;background:var(--field) center/cover;flex:none}
+.item-head .tt{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-head .acts{display:flex;gap:4px}
+.icon-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--field);cursor:pointer;display:grid;place-items:center;font-size:13px}
+.icon-btn:hover{border-color:var(--blue-bright)}
+.icon-btn.del:hover{border-color:var(--err);color:var(--err)}
+.item-body{padding:4px 14px 16px;display:grid;gap:14px;border-top:1px solid var(--line)}
+.item:not(.open) .item-body{display:none}
+.add{border:1px dashed var(--line);background:none;border-radius:12px;padding:12px;font-weight:700;color:var(--muted);cursor:pointer}
+.add:hover{border-color:var(--amber);color:var(--amber)}
+
+.preview{border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0;min-height:0;background:#000}
+.preview-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);font:700 12px var(--mono);color:var(--muted)}
+.preview-bar .sp{margin-left:auto;display:flex;gap:6px}
+.preview-stage{flex:1;display:grid;place-items:start center;overflow:auto;min-height:0}
+.preview iframe{border:0;width:100%;height:100%;background:var(--ink)}
+.preview[data-device="mobile"] iframe{width:390px;max-width:100%;height:100%;border-inline:1px solid var(--line)}
+.app[data-preview="off"] .preview{display:none}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:grid;place-items:center;z-index:50;padding:16px}
+.modal>div{width:min(560px,100%);max-height:80vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:12px}
+.modal h3{margin:0;font:900 18px var(--display)}
+.ver{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:500 13px var(--mono)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);opacity:0;background:var(--fg);color:var(--ink);font-weight:800;padding:12px 18px;border-radius:12px;z-index:60;transition:.25s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.bad{background:var(--err);color:#fff}
+.mobile-nav{display:none}
+
+@media (max-width:1180px){
+  .app,.app[data-preview="off"]{grid-template-columns:200px minmax(0,1fr)}
+  .preview{display:none}
+  #togglePreview{display:none}
+}
+@media (max-width:760px){
+  .app,.app[data-preview="off"]{grid-template-columns:1fr;height:auto;min-height:100%}
+  .side{display:none}
+  .mobile-nav{display:block;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+  .mobile-nav select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .grid2{grid-template-columns:1fr}
+  .topbar{padding:12px 16px}
+  .form{padding:18px 16px 80px;overflow:visible}
+  .main{min-height:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <form id="loginForm">
+    <img src="/assets/logo-dark.png" alt="Kmusic Radio">
+    <h1>Panel administrador</h1>
+    <p>Edita la señal en vivo, redes, videos, imágenes y todo el contenido de la página.</p>
+    <div class="f"><label for="pwd">Contraseña</label><input id="pwd" type="password" autocomplete="current-password" required></div>
+    <button class="btn btn-primary" type="submit">Entrar</button>
+    <div class="err" id="loginErr" role="alert"></div>
+  </form>
+</div>
+
+<div class="app" id="app" hidden data-preview="on">
+  <aside class="side">
+    <div class="brand"><img src="/assets/logo-dark.png" alt=""><span>PANEL</span></div>
+    <nav id="nav" aria-label="Secciones"></nav>
+    <div class="side-foot">
+      <button class="btn btn-sm" type="button" id="historyBtn">Historial de versiones</button>
+      <button class="btn btn-sm" type="button" id="exportBtn">Descargar respaldo</button>
+      <label class="btn btn-sm" for="importFile">Cargar respaldo</label>
+      <input type="file" id="importFile" accept="application/json" hidden>
+      <button class="btn btn-sm btn-danger" type="button" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </aside>
+  <section class="main">
+    <div class="mobile-nav"><label for="navSelect" style="position:absolute;left:-9999px">Sección</label><select id="navSelect"></select></div>
+    <div class="topbar">
+      <h1 id="secTitle">Panel</h1>
+      <span class="status" id="status">Sin cambios</span>
+      <button class="btn" type="button" id="togglePreview">Ocultar vista previa</button>
+      <a class="btn" href="/?preview=1" target="_blank" rel="noopener">Abrir vista previa</a>
+      <button class="btn btn-primary" type="button" id="publishBtn" disabled>Publicar cambios</button>
+    </div>
+    <div class="form"><div class="form-inner" id="form"></div></div>
+  </section>
+  <section class="preview" id="preview" data-device="desktop">
+    <div class="preview-bar">VISTA PREVIA EN VIVO
+      <div class="sp"><button class="btn btn-sm" type="button" data-device="desktop" aria-pressed="true">Escritorio</button><button class="btn btn-sm" type="button" data-device="mobile" aria-pressed="false">Celular</button></div>
+    </div>
+    <div class="preview-stage"><iframe id="frame" title="Vista previa de la página"></iframe></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const DRAFT = "kmusic-draft";
+let KEY = sessionStorage.getItem("kmusic-key") || "";
+let DEF = {}, PUB = {}, D = {}, current = "senal", dirty = false, storageOk = true;
+
+/* ===== ESQUEMA: qué se puede editar ===== */
+const TREND = [["up","▲ Sube"],["down","▼ Baja"],["new","Nuevo"],["same","= Igual"]];
+const SCHEMA = [
+  { id:"senal", ico:"📡", title:"Señal en vivo", anchor:"inicio", intro:"El link del audio en vivo es lo más importante: es lo que suena al tocar play en toda la página.", groups:[
+    { title:"Audio en vivo", path:"stream", fields:[
+      { k:"url", t:"url", label:"Link de la señal en vivo", help:"El link directo del stream (https). Ej: https://stream.zeno.fm/abc123 · https://tuservidor.com:8000/live · Shoutcast, Icecast, AzuraCast, Radio.co." , test:"audio"},
+      { k:"nowPlayingUrl", t:"url", label:"Link de “Sonando ahora” (opcional)", help:"API que dice qué canción suena. Compatible con AzuraCast (/api/nowplaying/...), Icecast (status-json.xsl) y Radio.co. Si no lo tienes, se muestra lo que escribas en Portada." },
+      { k:"liveVideoUrl", t:"video", label:"Transmisión en video (YouTube Live, opcional)", help:"Pega el link del en vivo de YouTube. Aparece la sección “Cabina en video”." }
+    ]}
+  ]},
+  { id:"marca", ico:"🎨", title:"Marca y SEO", anchor:"inicio", groups:[
+    { title:"Identidad", path:"brand", fields:[
+      { k:"name", t:"text", label:"Nombre de la emisora" },
+      { k:"slogan", t:"text", label:"Frase corta (aparece en el pie de página)" },
+      { k:"logo", t:"image", label:"Logo para fondo oscuro", help:"PNG con fondo transparente, mínimo 600 px de ancho." },
+      { row:[{ k:"accent", t:"color", label:"Color principal (botones)" },{ k:"accent2", t:"color", label:"Color secundario" }] }
+    ]},
+    { title:"Google y al compartir en redes", path:"seo", fields:[
+      { k:"title", t:"text", label:"Título en Google y pestaña del navegador" },
+      { k:"description", t:"textarea", label:"Descripción en Google (máx. 160 caracteres)" },
+      { k:"ogImage", t:"image", label:"Imagen al compartir el link (1200 × 630 px)" }
+    ]}
+  ]},
+  { id:"portada", ico:"✨", title:"Portada", anchor:"inicio", groups:[
+    { title:"Texto principal", path:"hero", fields:[
+      { k:"eyebrow", t:"text", label:"Línea pequeña superior" },
+      { row:[{ k:"title", t:"text", label:"Título" },{ k:"highlight", t:"text", label:"Palabra destacada" }] },
+      { k:"lead", t:"textarea", label:"Texto descriptivo" },
+      { k:"ctaText", t:"text", label:"Texto del botón de escuchar" }
+    ]},
+    { title:"Fondo de la portada", path:"hero", fields:[
+      { k:"bgImage", t:"image", label:"Imagen de fondo", help:"Foto horizontal (1920 × 1080). Se oscurece para que el texto se lea." },
+      { k:"bgVideo", t:"video", label:"Video de fondo (MP4, opcional)", help:"Link a un .mp4 corto (10–20 s, sin sonido, máx. 3 MB si lo subes aquí). Si hay video, reemplaza la imagen.", upload:true }
+    ]},
+    { title:"Cifras destacadas", path:"hero", fields:[
+      { k:"stats", t:"list", label:"Cifra", add:"Agregar cifra", titleKey:"value", fields:[{ row:[{ k:"value", t:"text", label:"Valor" },{ k:"label", t:"text", label:"Texto" }] }] }
+    ]},
+    { title:"Tarjeta “Sonando ahora”", path:"nowPlaying", fields:[
+      { row:[{ k:"title", t:"text", label:"Canción" },{ k:"artist", t:"text", label:"Artista" }] },
+      { k:"cover", t:"image", label:"Carátula" },
+      { k:"next", t:"text", label:"A continuación" }
+    ]},
+    { title:"Cinta de géneros (texto en movimiento)", path:"", fields:[
+      { k:"ticker", t:"list", add:"Agregar texto", titleKey:"text", fields:[{ k:"text", t:"text", label:"Texto" }] }
+    ]}
+  ]},
+  { id:"redes", ico:"📱", title:"Redes y contacto", anchor:"footer", groups:[
+    { title:"Redes sociales", path:"social", intro:"Las que dejes vacías no aparecen en la página.", fields:[
+      { row:[{ k:"instagram", t:"url", label:"Instagram" },{ k:"tiktok", t:"url", label:"TikTok" }] },
+      { row:[{ k:"youtube", t:"url", label:"YouTube" },{ k:"facebook", t:"url", label:"Facebook" }] },
+      { row:[{ k:"spotify", t:"url", label:"Spotify" },{ k:"x", t:"url", label:"X (Twitter)" }] },
+      { k:"whatsapp", t:"url", label:"Link de WhatsApp o canal", help:"Ej: https://wa.me/573001234567 o el link de tu canal de WhatsApp." },
+      { row:[{ k:"appstore", t:"url", label:"App en App Store" },{ k:"googleplay", t:"url", label:"App en Google Play" }] }
+    ]},
+    { title:"Datos de contacto", path:"contact", fields:[
+      { row:[{ k:"whatsapp", t:"text", label:"Número de WhatsApp", help:"Con indicativo, ej: 573001234567. Lo usa el botón de pauta." },{ k:"phone", t:"text", label:"Teléfono" }] },
+      { row:[{ k:"email", t:"email", label:"Correo" },{ k:"address", t:"text", label:"Ciudad o dirección" }] }
+    ]}
+  ]},
+  { id:"programacion", ico:"🗓️", title:"Programación", anchor:"programacion", groups:[
+    { title:"Programas", path:"", fields:[
+      { k:"schedule", t:"list", add:"Agregar programa", titleKey:"name", imgKey:"image", fields:[
+        { row:[{ k:"name", t:"text", label:"Nombre del programa" },{ k:"host", t:"text", label:"Locutor(es)" }] },
+        { row:[{ k:"start", t:"time", label:"Empieza" },{ k:"end", t:"time", label:"Termina" }] },
+        { k:"days", t:"days", label:"Días al aire" },
+        { k:"description", t:"textarea", label:"Descripción corta" },
+        { k:"image", t:"image", label:"Imagen del programa (16:9)" }
+      ]}
+    ]}
+  ]},
+  { id:"top", ico:"🏆", title:"Top 10", anchor:"top", groups:[
+    { title:"Ranking", path:"top", fields:[
+      { row:[{ k:"week", t:"text", label:"Semana" },{ k:"voteUrl", t:"url", label:"Link para votar (opcional)" }] },
+      { k:"items", t:"list", add:"Agregar canción", titleKey:"title", imgKey:"cover", fields:[
+        { row:[{ k:"title", t:"text", label:"Canción" },{ k:"artist", t:"text", label:"Artista" }] },
+        { row:[{ k:"trend", t:"select", label:"Tendencia", options:TREND },{ k:"link", t:"url", label:"Link para escuchar (Spotify / YouTube)" }] },
+        { k:"cover", t:"image", label:"Carátula (cuadrada)" }
+      ]}
+    ]}
+  ]},
+  { id:"videos", ico:"🎬", title:"Videos", anchor:"videos", intro:"Pega links de YouTube (videos, shorts o en vivo), Vimeo o archivos MP4. La miniatura de YouTube se pone sola.", groups:[
+    { title:"Videos", path:"videos", fields:[
+      { k:"channelUrl", t:"url", label:"Link del canal de YouTube" },
+      { k:"items", t:"list", add:"Agregar video", titleKey:"title", imgKey:"cover", fields:[
+        { k:"url", t:"video", label:"Link del video" },
+        { row:[{ k:"title", t:"text", label:"Título" },{ k:"tag", t:"text", label:"Etiqueta (ESTRENO, ENTREVISTA…)" }] },
+        { row:[{ k:"duration", t:"text", label:"Duración (ej. 03:45)" }] },
+        { k:"cover", t:"image", label:"Miniatura propia (opcional)" }
+      ]}
+    ]}
+  ]},
+  { id:"locutores", ico:"🎙️", title:"Locutores", anchor:"locutores", groups:[
+    { title:"Equipo", path:"", fields:[
+      { k:"hosts", t:"list", add:"Agregar locutor", titleKey:"name", imgKey:"photo", fields:[
+        { row:[{ k:"name", t:"text", label:"Nombre" },{ k:"program", t:"text", label:"Programa y horario" }] },
+        { k:"photo", t:"image", label:"Foto (vertical 4:5)" },
+        { k:"instagram", t:"url", label:"Instagram personal" }
+      ]}
+    ]}
+  ]},
+  { id:"eventos", ico:"🎟️", title:"Eventos", anchor:"eventos", groups:[
+    { title:"Agenda", path:"", fields:[
+      { k:"events", t:"list", add:"Agregar evento", titleKey:"title", imgKey:"image", fields:[
+        { row:[{ k:"title", t:"text", label:"Nombre del evento" },{ k:"date", t:"date", label:"Fecha" }] },
+        { k:"place", t:"text", label:"Lugar" },
+        { k:"link", t:"url", label:"Link de entradas" },
+        { k:"image", t:"image", label:"Imagen o afiche" }
+      ]}
+    ]}
+  ]},
+  { id:"noticias", ico:"📰", title:"Noticias", anchor:"noticias", groups:[
+    { title:"Noticias", path:"", fields:[
+      { k:"news", t:"list", add:"Agregar noticia", titleKey:"title", imgKey:"image", fields:[
+        { k:"title", t:"text", label:"Titular" },
+        { row:[{ k:"category", t:"text", label:"Categoría" },{ k:"date", t:"date", label:"Fecha" }] },
+        { k:"url", t:"url", label:"Link a la nota completa (Instagram, blog, etc.)" },
+        { k:"image", t:"image", label:"Imagen (3:2)" }
+      ]}
+    ]}
+  ]},
+  { id:"publicidad", ico:"💰", title:"Publicidad y aliados", anchor:"pauta", groups:[
+    { title:"Banners publicitarios", path:"", intro:"Rotan cada 7 segundos debajo de la programación. Tamaño ideal: 1600 × 400 px.", fields:[
+      { k:"banners", t:"list", add:"Agregar banner", titleKey:"alt", imgKey:"image", fields:[
+        { k:"image", t:"image", label:"Imagen del banner" },
+        { row:[{ k:"link", t:"url", label:"Link al anunciante" },{ k:"alt", t:"text", label:"Nombre del anunciante" }] }
+      ]}
+    ]},
+    { title:"Marcas aliadas", path:"", fields:[
+      { k:"sponsors", t:"list", add:"Agregar marca", titleKey:"name", imgKey:"logo", fields:[
+        { row:[{ k:"name", t:"text", label:"Marca" },{ k:"link", t:"url", label:"Link" }] },
+        { k:"logo", t:"image", label:"Logo (PNG transparente)" }
+      ]}
+    ]},
+    { title:"Sección “Anúnciate”", path:"ads", fields:[
+      { k:"title", t:"text", label:"Título" },
+      { k:"bullets", t:"list", add:"Agregar beneficio", titleKey:"text", fields:[{ k:"text", t:"text", label:"Beneficio" }] },
+      { k:"stats", t:"list", add:"Agregar cifra", titleKey:"value", fields:[{ row:[{ k:"value", t:"text", label:"Valor" },{ k:"label", t:"text", label:"Texto" }] }] },
+      { row:[{ k:"ctaText", t:"text", label:"Texto del botón" },{ k:"note", t:"text", label:"Nota al pie" }] }
+    ]}
+  ]},
+  { id:"app", ico:"📲", title:"App y pie de página", anchor:"footer", groups:[
+    { title:"Bloque de la app", path:"app", fields:[
+      { k:"title", t:"text", label:"Título" }, { k:"text", t:"textarea", label:"Texto" },
+      { k:"image", t:"image", label:"Imagen (celular con la app, 4:3)" }
+    ]},
+    { title:"Pie de página", path:"footer", fields:[
+      { row:[{ k:"copyright", t:"text", label:"Derechos" },{ k:"tagline", t:"text", label:"Frase final" }] }
+    ]}
+  ]},
+  { id:"secciones", ico:"👁️", title:"Mostrar u ocultar", anchor:"inicio", intro:"Apaga las secciones que todavía no quieras mostrar.", groups:[
+    { title:"Secciones de la página", path:"sections", fields:[
+      { k:"schedule", t:"toggle", label:"Programación" },{ k:"banners", t:"toggle", label:"Banners publicitarios" },
+      { k:"top", t:"toggle", label:"Top 10" },{ k:"live", t:"toggle", label:"Cabina en video (si hay link)" },
+      { k:"videos", t:"toggle", label:"Videos" },{ k:"hosts", t:"toggle", label:"Locutores" },
+      { k:"app", t:"toggle", label:"App y redes" },{ k:"events", t:"toggle", label:"Eventos" },
+      { k:"news", t:"toggle", label:"Noticias" },{ k:"sponsors", t:"toggle", label:"Marcas aliadas" },
+      { k:"ads", t:"toggle", label:"Anúnciate" }
+    ]}
+  ]}
+];
+
+/* ===== utilidades de ruta ===== */
+const parts = (p) => String(p).split(".").filter(Boolean);
+function getP(p) { return parts(p).reduce((o, k) => (o == null ? undefined : o[k]), D); }
+function setP(p, v) { const ks = parts(p); let o = D; ks.slice(0, -1).forEach((k, i) => { if (o[k] == null) o[k] = /^\d+$/.test(ks[i + 1]) ? [] : {}; o = o[k]; }); o[ks.at(-1)] = v; }
+const join = (...a) => a.filter((x) => x !== "" && x != null).join(".");
+function deepMerge(base, over) {
+  if (Array.isArray(over)) return over;
+  if (over && typeof over === "object" && base && typeof base === "object" && !Array.isArray(base)) { const out = { ...base }; for (const k of Object.keys(over)) out[k] = deepMerge(base[k], over[k]); return out; }
+  return over === undefined ? base : over;
+}
+
+/* ===== API ===== */
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { "Content-Type": "application/json", "x-admin-key": KEY, ...(opts.headers || {}) } });
+  let j = {}; try { j = await r.json(); } catch {}
+  if (!r.ok) throw Object.assign(new Error(j.error || `Error ${r.status}`), { status: r.status });
+  return j;
+}
+let tt;
+function toast(m, bad) { const t = $("#toast"); t.textContent = m; t.className = "toast show" + (bad ? " bad" : ""); clearTimeout(tt); tt = setTimeout(() => (t.className = "toast"), 3500); }
+
+/* ===== LOGIN ===== */
+$("#loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault(); KEY = $("#pwd").value.trim(); $("#loginErr").textContent = "";
+  try { const r = await api("/api/login", { method: "POST" }); storageOk = r.storage; sessionStorage.setItem("kmusic-key", KEY); start(); }
+  catch (err) { $("#loginErr").textContent = err.status === 404 ? "El servidor del panel no está activo. Revisa la instalación (README)." : err.message; }
+});
+$("#logoutBtn").addEventListener("click", () => { sessionStorage.removeItem("kmusic-key"); location.reload(); });
+
+async function start() {
+  $("#login").hidden = true; $("#app").hidden = false;
+  try { DEF = await (await fetch("/config.default.json", { cache: "no-store" })).json(); } catch { DEF = {}; }
+  try { const r = await fetch("/api/config", { cache: "no-store" }); PUB = deepMerge(DEF, (await r.json()).config || {}); } catch { PUB = clone(DEF); }
+  D = clone(PUB);
+  let draft = null; try { draft = JSON.parse(localStorage.getItem(DRAFT) || "null"); } catch {}
+  if (draft && JSON.stringify(draft) !== JSON.stringify(PUB)) { D = deepMerge(DEF, draft); setDirty(true); toast("Recuperamos tus cambios sin publicar."); }
+  else saveDraft();
+  buildNav(); show(location.hash.slice(1) || "senal");
+  $("#frame").src = "/?preview=1";
+}
+
+/* ===== NAVEGACIÓN ===== */
+function buildNav() {
+  $("#nav").innerHTML = SCHEMA.map((s) => `<button type="button" data-sec="${s.id}"><span class="ico">${s.ico}</span>${s.title}</button>`).join("");
+  $("#navSelect").innerHTML = SCHEMA.map((s) => `<option value="${s.id}">${s.ico} ${s.title}</option>`).join("");
+}
+$("#nav").addEventListener("click", (e) => { const b = e.target.closest("[data-sec]"); if (b) show(b.dataset.sec); });
+$("#navSelect").addEventListener("change", (e) => show(e.target.value));
+function show(id) {
+  const sec = SCHEMA.find((s) => s.id === id) || SCHEMA[0]; current = sec.id;
+  history.replaceState(null, "", "#" + sec.id);
+  [...$("#nav").children].forEach((b) => b.setAttribute("aria-current", b.dataset.sec === sec.id));
+  $("#navSelect").value = sec.id; $("#secTitle").textContent = sec.title;
+  renderForm(); $(".form").scrollTop = 0; scrollTo(0, 0);
+  pushPreview(sec.anchor);
+}
+
+/* ===== FORMULARIO ===== */
+function renderForm() {
+  const sec = SCHEMA.find((s) => s.id === current);
+  let h = "";
+  if (!storageOk) h += `<div class="notice warn"><b>Falta conectar el almacenamiento.</b> Puedes editar y ver la vista previa, pero para publicar hay que conectar Vercel Blob (ver README). Mientras tanto usa “Descargar respaldo”.</div>`;
+  if (sec.intro) h += `<p class="intro">${sec.intro}</p>`;
+  h += sec.groups.map((g) => `<div class="group"><h2>${g.title}</h2>${g.intro ? `<p class="help" style="margin:0">${g.intro}</p>` : ""}${fieldsHtml(g.fields, g.path)}</div>`).join("");
+  $("#form").innerHTML = h;
+  $("#form").querySelectorAll("[data-video-check]").forEach(updateVideoBadge);
+}
+function fieldsHtml(fields, base) { return fields.map((f) => f.row ? `<div class="grid2">${fieldsHtml(f.row, base)}</div>` : fieldHtml(f, join(base, f.k))).join(""); }
+let uid = 0;
+function fieldHtml(f, p) {
+  const id = "f" + (++uid) + "-" + p.replace(/\W/g, "_"), v = getP(p);
+  const help = f.help ? `<span class="help">${f.help}</span>` : "";
+  const val = esc(v ?? "");
+  switch (f.t) {
+    case "textarea": return `<div class="f"><label for="${id}">${f.label}</label><textarea id="${id}" data-p="${p}">${val}</textarea>${help}</div>`;
+    case "select": return `<div class="f"><label for="${id}">${f.label}</label><select id="${id}" data-p="${p}">${f.options.map(([o, l]) => `<option value="${o}"${o === v ? " selected" : ""}>${l}</option>`).join("")}</select>${help}</div>`;
+    case "color": return `<div class="f"><label for="${id}">${f.label}</label><div class="color-row"><input type="color" id="${id}" data-p="${p}" value="${val || "#ffa914"}"><input type="text" data-p="${p}" value="${val}" aria-label="${f.label} en código"></div></div>`;
+    case "toggle": return `<label class="toggle" for="${id}"><span>${f.label}</span><input type="checkbox" id="${id}" data-p="${p}" data-bool${v ? " checked" : ""}></label>`;
+    case "days": {
+      const sel = Array.isArray(v) ? v : [];
+      return `<div class="f"><span class="lbl">${f.label}</span><div class="days" data-days="${p}">${[1,2,3,4,5,6,0].map((d) => `<label><input type="checkbox" value="${d}"${sel.includes(d) ? " checked" : ""}>${["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"][d]}</label>`).join("")}</div></div>`;
+    }
+    case "image": return `<div class="f"><span class="lbl">${f.label}</span><div class="media">
+        <div class="thumb" data-thumb="${p}" style="${v ? `background-image:url('${esc(v)}')` : ""}">${v ? "" : "SIN<br>IMAGEN"}</div>
+        <div><input type="url" id="${id}" data-p="${p}" value="${val}" placeholder="Pega un link de imagen o súbela" aria-label="${f.label}">
+        <div class="row"><label class="btn btn-sm" for="${id}-up">Subir imagen</label><input type="file" id="${id}-up" accept="image/*" data-upload="${p}" hidden>
+        ${v ? `<button class="btn btn-sm btn-danger" type="button" data-clear="${p}">Quitar</button>` : ""}</div>${help}</div></div></div>`;
+    case "video": return `<div class="f"><label for="${id}">${f.label}</label><input type="url" id="${id}" data-p="${p}" value="${val}" placeholder="https://www.youtube.com/watch?v=…" data-video-check>
+        <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge" data-badge></span>
+        ${f.upload ? `<label class="btn btn-sm" for="${id}-up">Subir MP4</label><input type="file" id="${id}-up" accept="video/mp4" data-upload="${p}" hidden>` : ""}</div>${help}</div>`;
+    case "list": return listHtml(f, p);
+    default: return `<div class="f"><label for="${id}">${f.label}</label><input type="${f.t === "url" ? "url" : f.t}" id="${id}" data-p="${p}" value="${val}"${f.t === "url" ? ' placeholder="https://"' : ""}>
+        ${f.test === "audio" ? `<div style="display:flex;gap:8px;align-items:center"><button class="btn btn-sm" type="button" data-test-audio="${p}">Probar señal</button><span class="badge" data-audio-badge></span></div>` : ""}${help}</div>`;
+  }
+}
+const openItems = new Set();
+function listHtml(f, p) {
+  const arr = getP(p) || [];
+  return `<div class="f">${f.label && !f.add ? `<span class="lbl">${f.label}</span>` : ""}<div class="list" data-list="${p}">
+    ${arr.map((it, i) => {
+      const ip = join(p, i), img = f.imgKey ? it?.[f.imgKey] : "";
+      const t = (f.titleKey && it?.[f.titleKey]) || `Elemento ${i + 1}`;
+      return `<div class="item${openItems.has(ip) ? " open" : ""}" data-item="${ip}">
+        <div class="item-head" data-toggle="${ip}"><span class="n">${i + 1}</span>${f.imgKey ? `<span class="mini" style="${img ? `background-image:url('${esc(img)}')` : ""}"></span>` : ""}
+          <span class="tt">${esc(t)}</span>
+          <span class="acts"><button class="icon-btn" type="button" data-move="${p}|${i}|-1" aria-label="Subir">↑</button><button class="icon-btn" type="button" data-move="${p}|${i}|1" aria-label="Bajar">↓</button>
+          <button class="icon-btn" type="button" data-dup="${p}|${i}" aria-label="Duplicar">⧉</button><button class="icon-btn del" type="button" data-del="${p}|${i}" aria-label="Eliminar">✕</button></span></div>
+        <div class="item-body">${openItems.has(ip) ? fieldsHtml(f.fields, ip) : ""}</div></div>`;
+    }).join("")}
+    <button class="add" type="button" data-add="${p}">+ ${f.add || "Agregar"}</button></div></div>`;
+}
+function findListField(p) {
+  let found = null;
+  const walk = (fields, base) => fields.forEach((f) => { if (f.row) return walk(f.row, base); const fp = join(base, f.k); if (f.t === "list") { if (fp.replace(/\.\d+/g, "") === p.replace(/\.\d+/g, "")) found = f; } });
+  SCHEMA.forEach((s) => s.groups.forEach((g) => walk(g.fields, g.path)));
+  return found;
+}
+function blankItem(f) { const o = {}; const walk = (fs) => fs.forEach((x) => x.row ? walk(x.row) : (o[x.k] = x.t === "list" ? [] : x.t === "days" ? [1,2,3,4,5] : x.t === "select" ? x.options[0][0] : "")); walk(f.fields); return o; }
+
+/* ===== eventos del formulario ===== */
+const form = $("#form");
+form.addEventListener("input", (e) => {
+  const el = e.target, p = el.dataset.p; if (!p) return;
+  const v = el.dataset.bool !== undefined ? el.checked : el.value;
+  setP(p, v); changed();
+  if (el.type === "color" || (el.closest(".color-row") && el.type === "text")) el.closest(".color-row").querySelectorAll("input").forEach((x) => x !== el && (x.value = v));
+  const th = form.querySelector(`[data-thumb="${CSS.escape(p)}"]`); if (th) setThumb(th, v);
+  if (el.matches("[data-video-check]")) updateVideoBadge(el);
+  const item = el.closest("[data-item]"); if (item) refreshHead(item);
+});
+form.addEventListener("change", (e) => {
+  const box = e.target.closest("[data-days]");
+  if (box) { setP(box.dataset.days, [...box.querySelectorAll("input:checked")].map((x) => +x.value)); changed(); }
+  const up = e.target.dataset.upload; if (up && e.target.files[0]) upload(e.target.files[0], up, e.target);
+});
+form.addEventListener("click", (e) => {
+  const b = e.target.closest("button,[data-toggle]"); if (!b) return;
+  const d = b.dataset;
+  if (d.toggle && !e.target.closest(".acts")) { openItems.has(d.toggle) ? openItems.delete(d.toggle) : openItems.add(d.toggle); renderForm(); return; }
+  if (d.add) { const f = findListField(d.add); const arr = getP(d.add) || []; arr.push(blankItem(f)); setP(d.add, arr); openItems.add(join(d.add, arr.length - 1)); changed(); renderForm(); return; }
+  if (d.del) { const [p, i] = d.del.split("|"); const arr = getP(p); const name = b.closest(".item").querySelector(".tt").textContent;
+    if (b.dataset.confirm !== "1") { b.dataset.confirm = "1"; b.textContent = "¿Sí?"; b.style.width = "auto"; b.style.padding = "0 8px"; setTimeout(() => { if (b.isConnected) { b.dataset.confirm = ""; b.textContent = "✕"; b.style = ""; } }, 2500); return; }
+    arr.splice(+i, 1); openItems.clear(); changed(); renderForm(); toast(`Eliminado: ${name}`); return; }
+  if (d.dup) { const [p, i] = d.dup.split("|"); const arr = getP(p); arr.splice(+i + 1, 0, clone(arr[+i])); openItems.clear(); openItems.add(join(p, +i + 1)); changed(); renderForm(); return; }
+  if (d.move) { const [p, i, dir] = d.move.split("|"); const arr = getP(p), a = +i, z = a + +dir; if (z < 0 || z >= arr.length) return; [arr[a], arr[z]] = [arr[z], arr[a]]; openItems.clear(); changed(); renderForm(); return; }
+  if (d.clear) { setP(d.clear, ""); changed(); renderForm(); return; }
+  if (d.testAudio) { testAudio(getP(d.testAudio), b.parentElement.querySelector("[data-audio-badge]")); }
+});
+function refreshHead(item) {
+  const ip = item.dataset.item, f = findListField(ip.replace(/\.\d+$/, "")); if (!f) return;
+  const it = getP(ip); item.querySelector(".tt").textContent = (f.titleKey && it?.[f.titleKey]) || "Elemento";
+  const mini = item.querySelector(".mini"); if (mini) mini.style.backgroundImage = it?.[f.imgKey] ? `url('${it[f.imgKey]}')` : "";
+}
+function setThumb(th, v) { th.style.backgroundImage = v ? `url('${v}')` : ""; th.innerHTML = v ? "" : "SIN<br>IMAGEN"; }
+
+function parseVideo(u) {
+  u = String(u || "").trim(); if (!u) return null;
+  let m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/); if (m) return { type: "YouTube", thumb: `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg` };
+  if (/vimeo\.com\/(?:video\/)?\d+/.test(u)) return { type: "Vimeo" };
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(u)) return { type: "Archivo MP4" };
+  if (/^https?:\/\//.test(u)) return { type: "Enlace externo" };
+  return { type: "Link no válido", bad: true };
+}
+function updateVideoBadge(el) {
+  const b = el.parentElement.querySelector("[data-badge]"); const v = parseVideo(el.value);
+  b.textContent = v ? "✓ " + v.type : "Sin video"; b.className = "badge" + (v ? (v.bad ? " bad" : " ok") : "");
+}
+function testAudio(url, badge) {
+  if (!url) { badge.textContent = "Escribe el link primero"; badge.className = "badge bad"; return; }
+  badge.textContent = "Conectando…"; badge.className = "badge";
+  const a = new Audio(); let done = false;
+  const fin = (ok, msg) => { if (done) return; done = true; a.pause(); a.src = ""; badge.textContent = msg; badge.className = "badge " + (ok ? "ok" : "bad"); };
+  a.addEventListener("playing", () => fin(true, "✓ La señal funciona"));
+  a.addEventListener("error", () => fin(false, "✕ No responde. Revisa el link (debe ser https)"));
+  setTimeout(() => fin(false, "✕ Tardó demasiado en responder"), 12000);
+  a.volume = 0.01; a.src = url; a.play().catch(() => {});
+}
+
+/* ===== SUBIDA DE ARCHIVOS ===== */
+async function compress(file) {
+  if (!file.type.startsWith("image/") || /gif|svg/.test(file.type)) return file;
+  if (file.size < 400 * 1024 && /png|webp/.test(file.type)) return file;
+  const img = await createImageBitmap(file);
+  const max = 2000, s = Math.min(1, max / Math.max(img.width, img.height));
+  const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  const type = file.type === "image/png" ? "image/webp" : "image/jpeg";
+  const blob = await new Promise((r) => c.toBlob(r, type, 0.85));
+  return blob && blob.size < file.size ? new File([blob], file.name, { type: blob.type }) : file;
+}
+async function upload(file, p, input) {
+  const label = input.previousElementSibling, old = label?.textContent;
+  try {
+    if (label) label.textContent = "Subiendo…";
+    const f = await compress(file);
+    if (f.size > 3 * 1024 * 1024) throw new Error(file.type.startsWith("video") ? "El video pesa más de 3 MB. Súbelo a YouTube o usa un link MP4 externo." : "La imagen pesa más de 3 MB incluso comprimida.");
+    const data = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(f); });
+    const { url } = await api("/api/upload", { method: "POST", body: JSON.stringify({ name: file.name, type: f.type, data }) });
+    setP(p, url); changed(); renderForm(); toast("Archivo subido.");
+  } catch (e) { toast(e.message, true); if (label) label.textContent = old; }
+}
+
+/* ===== ESTADO, BORRADOR Y VISTA PREVIA ===== */
+let pt;
+function changed() { setDirty(true); saveDraft(); clearTimeout(pt); pt = setTimeout(() => pushPreview(), 250); }
+function setDirty(v) {
+  dirty = v; const s = $("#status");
+  s.textContent = v ? "Cambios sin publicar" : "Publicado"; s.className = "status " + (v ? "dirty" : "ok");
+  $("#publishBtn").disabled = !v;
+}
+function saveDraft() { try { localStorage.setItem(DRAFT, JSON.stringify(D)); } catch {} }
+function pushPreview(anchor) { const w = $("#frame").contentWindow; if (w) w.postMessage({ type: "kmusic-config", config: D, scrollTo: anchor }, location.origin); }
+addEventListener("message", (e) => { if (e.origin === location.origin && e.data?.type === "kmusic-ready") pushPreview(SCHEMA.find((s) => s.id === current)?.anchor); });
+addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+$("#publishBtn").addEventListener("click", async () => {
+  const b = $("#publishBtn"); b.disabled = true; b.textContent = "Publicando…";
+  try { await api("/api/config", { method: "POST", body: JSON.stringify({ config: D }) }); PUB = clone(D); setDirty(false); saveDraft(); toast("¡Publicado! La página ya muestra los cambios."); }
+  catch (e) { toast(e.message, true); b.disabled = false; }
+  b.textContent = "Publicar cambios";
+});
+$("#togglePreview").addEventListener("click", () => { const off = $("#app").dataset.preview === "on"; $("#app").dataset.preview = off ? "off" : "on"; $("#togglePreview").textContent = off ? "Mostrar vista previa" : "Ocultar vista previa"; });
+$("#preview").addEventListener("click", (e) => { const b = e.target.closest("[data-device]"); if (!b || b.id === "preview") return; $("#preview").dataset.device = b.dataset.device; $("#preview").querySelectorAll("button[data-device]").forEach((x) => x.setAttribute("aria-pressed", x === b)); });
+
+/* Respaldo e historial */
+$("#exportBtn").addEventListener("click", () => {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(D, null, 2)], { type: "application/json" }));
+  a.download = `kmusic-respaldo-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href);
+});
+$("#importFile").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try { D = deepMerge(DEF, JSON.parse(await f.text())); changed(); renderForm(); toast("Respaldo cargado. Revisa y publica."); } catch { toast("Ese archivo no es un respaldo válido.", true); }
+  e.target.value = "";
+});
+$("#historyBtn").addEventListener("click", async () => {
+  const m = document.createElement("div"); m.className = "modal"; m.innerHTML = `<div><h3>Historial de versiones</h3><p class="help" style="margin:0">Se guardan las últimas 30 publicaciones. Restaurar carga la versión en el editor; luego la publicas.</p><div id="vers">Cargando…</div><button class="btn" type="button" data-close>Cerrar</button></div>`;
+  document.body.append(m);
+  m.addEventListener("click", async (e) => {
+    if (e.target === m || e.target.closest("[data-close]")) return m.remove();
+    const r = e.target.closest("[data-restore]"); if (!r) return;
+    try { const { config } = await api("/api/history?id=" + encodeURIComponent(r.dataset.restore)); D = deepMerge(DEF, config); changed(); renderForm(); m.remove(); toast("Versión cargada. Publica para aplicarla."); } catch (err) { toast(err.message, true); }
+  });
+  try {
+    const { versions } = await api("/api/history");
+    const fmt = (id) => { const m2 = id.match(/^(\d{4})-(\d\d)-(\d\d)T(\d\d)-(\d\d)/); return m2 ? new Date(Date.UTC(+m2[1], m2[2] - 1, +m2[3], +m2[4], +m2[5])).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" }) : id; };
+    $("#vers", m).innerHTML = versions.length ? versions.map((v) => `<div class="ver"><span>${fmt(v.id)}</span><button class="btn btn-sm" type="button" data-restore="${esc(v.id)}">Restaurar</button></div>`).join("") : "Aún no hay publicaciones.";
+  } catch (err) { $("#vers", m).textContent = err.message; }
+});
+
+if (KEY) api("/api/login", { method: "POST" }).then((r) => { storageOk = r.storage; start(); }).catch(() => sessionStorage.removeItem("kmusic-key"));
+})();
+</script>
+</body>
+</html>
