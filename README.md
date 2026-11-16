@@ -19,7 +19,8 @@ guarda las últimas 30 versiones para restaurar y permite descargar/cargar un re
 ## Activarlo en Vercel (una sola vez)
 
 1. En el proyecto de Vercel → **Storage** → **Create** → **Blob** → acceso **Public** → conectarlo al proyecto.
-   Esto crea solo la variable `BLOB_READ_WRITE_TOKEN`.
+   Luego en el Blob → **Projects** → **Connect Project** → `kmusicradio`.
+   Vercel crea sola la variable `BLOB_STORE_ID` (o `BLOB_READ_WRITE_TOKEN` en almacenes antiguos); el código acepta ambas.
 2. En **Settings → Environment Variables** crear `ADMIN_PASSWORD` con la contraseña del panel.
 3. **Redeploy** del proyecto.
 4. Entrar a `https://tu-dominio/admin` con esa contraseña.

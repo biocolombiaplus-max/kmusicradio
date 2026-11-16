@@ -417,7 +417,7 @@ function show(id) {
 function renderForm() {
   const sec = SCHEMA.find((s) => s.id === current);
   let h = "";
-  if (!storageOk) h += `<div class="notice warn"><b>Falta conectar el almacenamiento.</b> Puedes editar y ver la vista previa, pero para publicar hay que conectar Vercel Blob (ver README). Mientras tanto usa “Descargar respaldo”.</div>`;
+  if (!storageOk) h += `<div class="notice warn"><b>Falta conectar el almacenamiento.</b> En Vercel: Storage → tu Blob → <b>Projects</b> → <b>Connect Project</b> → elige kmusicradio (marca Production y Preview). Después ve a Deployments → último → <b>Redeploy</b>. Mientras tanto puedes editar y usar “Descargar respaldo”.</div>`;
   if (sec.intro) h += `<p class="intro">${sec.intro}</p>`;
   h += sec.groups.map((g) => `<div class="group"><h2>${g.title}</h2>${g.intro ? `<p class="help" style="margin:0">${g.intro}</p>` : ""}${fieldsHtml(g.fields, g.path)}</div>`).join("");
   $("#form").innerHTML = h;
