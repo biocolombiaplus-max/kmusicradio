@@ -333,3 +333,11 @@ button.video{padding:0;font:inherit;text-align:left;width:100%}
   .videos .video.feature{grid-column:auto}
   .banner{aspect-ratio:2/1}
 }
+
+/* Reproductor flotante para señal en video (Kick / YouTube / Twitch) */
+.dock{position:fixed;z-index:57;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(96px + env(safe-area-inset-bottom,0px));width:min(400px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.8)}
+.dock-bar{display:flex;align-items:center;gap:8px;padding:8px 10px}
+.dock-sp{flex:1}
+.dock-bar button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--ink);color:var(--fg);cursor:pointer}
+.dock-inner{position:relative;aspect-ratio:16/9;background:#000}
+.dock-inner iframe{position:absolute;inset:0;width:100%;height:100%;border:0}

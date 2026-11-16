@@ -29,6 +29,11 @@ function parseVideo(url) {
   if (!u) return null;
   let m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/);
   if (m) return { type: "yt", id: m[1], embed: `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&playsinline=1`, thumb: `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg`, url: u };
+  m = u.match(/kick\.com\/(?!video\/)([\w-]+)/i);
+  if (m) return { type: "kick", live: true, embed: `https://player.kick.com/${m[1]}?autoplay=true&muted=false`, url: u };
+  m = u.match(/twitch\.tv\/([\w-]+)/i);
+  if (m) return { type: "twitch", live: true, embed: `https://player.twitch.tv/?channel=${m[1]}&parent=${location.hostname}&autoplay=true&muted=false`, url: u };
+  if (m = u.match(/youtube\.com\/(@[\w.-]+)\/live/)) return { type: "link", url: u };
   m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (m) return { type: "vimeo", embed: `https://player.vimeo.com/video/${m[1]}?autoplay=1`, url: u };
   if (/\.(mp4|webm|mov)(\?|$)/i.test(u)) return { type: "file", src: u, url: u };
@@ -335,7 +340,7 @@ function openVideo(url) {
   const v = parseVideo(url);
   if (!v) { toast("Este video aún no tiene link. Agrégalo desde el panel."); return; }
   if (v.type === "link") { window.open(v.url, "_blank", "noopener"); return; }
-  if (playing) { audio.pause(); setPlaying(false); }
+  if (playing) stopAll();
   $("#lbInner").innerHTML = v.type === "file"
     ? `<video src="${esc(v.src)}" controls autoplay playsinline></video>`
     : `<iframe src="${esc(v.embed)}" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
@@ -350,6 +355,15 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#lightbox").h
 const audio = new Audio(); audio.preload = "none";
 let playing = false;
 $("#vol").addEventListener("input", (e) => (audio.volume = +e.target.value));
+/* Señal en video (Kick, YouTube, Twitch): reproductor flotante */
+function openDock(v) {
+  $("#dockInner").innerHTML = `<iframe src="${esc(v.embed)}" title="Señal en vivo" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+  $("#dock").hidden = false; setPlaying(true);
+}
+function stopAll() { audio.pause(); $("#dock").hidden = true; $("#dockInner").innerHTML = ""; setPlaying(false); }
+$("#dockClose").addEventListener("click", stopAll);
+$("#dockBig").addEventListener("click", () => { const v = parseVideo(C.stream?.url); if (v) openVideo(v.url); });
+
 function setPlaying(p) {
   playing = p; document.body.classList.toggle("playing", p);
   $$(".p-btn,.play-big").forEach((b) => { b.innerHTML = ic(24, p); b.setAttribute("aria-label", p ? "Pausar" : "Reproducir en vivo"); });
@@ -362,8 +376,10 @@ function setPlaying(p) {
 document.addEventListener("click", (e) => {
   const play = e.target.closest("[data-play]");
   if (play) {
-    if (playing) { audio.pause(); setPlaying(false); return; }
+    if (playing) { stopAll(); return; }
     const url = safeUrl(C.stream?.url);
+    const vs = parseVideo(url);
+    if (vs && vs.embed) { openDock(vs); return; }
     if (url) {
       audio.src = url;
       audio.play().then(() => setPlaying(true)).catch(() => toast("No pudimos conectar la señal. Intenta de nuevo en un momento."));

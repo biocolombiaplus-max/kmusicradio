@@ -200,9 +200,9 @@ const TREND = [["up","▲ Sube"],["down","▼ Baja"],["new","Nuevo"],["same","= 
 const SCHEMA = [
   { id:"senal", ico:"📡", title:"Señal en vivo", anchor:"inicio", intro:"El link del audio en vivo es lo más importante: es lo que suena al tocar play en toda la página.", groups:[
     { title:"Audio en vivo", path:"stream", fields:[
-      { k:"url", t:"url", label:"Link de la señal en vivo", help:"El link directo del stream (https). Ej: https://stream.zeno.fm/abc123 · https://tuservidor.com:8000/live · Shoutcast, Icecast, AzuraCast, Radio.co." , test:"audio"},
-      { k:"nowPlayingUrl", t:"url", label:"Link de “Sonando ahora” (opcional)", help:"API que dice qué canción suena. Compatible con AzuraCast (/api/nowplaying/...), Icecast (status-json.xsl) y Radio.co. Si no lo tienes, se muestra lo que escribas en Portada." },
-      { k:"liveVideoUrl", t:"video", label:"Transmisión en video (YouTube Live, opcional)", help:"Pega el link del en vivo de YouTube. Aparece la sección “Cabina en video”." }
+      { k:"url", t:"url", label:"Link de la señal en vivo", help:"Dos opciones: 1) Stream de audio (https): Zeno.fm, Shoutcast, Icecast, AzuraCast, Radio.co. 2) Canal en video: Kick (https://kick.com/tucanal), YouTube Live o Twitch; se reproduce en una ventanita flotante.", test:"audio"},
+      { k:"nowPlayingUrl", t:"url", label:"Link de “Sonando ahora” (opcional)", help:"Solo para streams de audio. Es una dirección técnica de datos (JSON) que da tu proveedor: AzuraCast (/api/nowplaying/...), Icecast (status-json.xsl) o Radio.co. NO pongas aquí el link de Kick ni de YouTube. Si no la tienes, déjalo vacío.", warnVideo:true },
+      { k:"liveVideoUrl", t:"video", label:"Transmisión en video (opcional)", help:"Kick, YouTube Live o Twitch. Aparece la sección “Cabina en video” con el reproductor." }
     ]}
   ]},
   { id:"marca", ico:"🎨", title:"Marca y SEO", anchor:"inicio", groups:[
@@ -422,6 +422,7 @@ function renderForm() {
   h += sec.groups.map((g) => `<div class="group"><h2>${g.title}</h2>${g.intro ? `<p class="help" style="margin:0">${g.intro}</p>` : ""}${fieldsHtml(g.fields, g.path)}</div>`).join("");
   $("#form").innerHTML = h;
   $("#form").querySelectorAll("[data-video-check]").forEach(updateVideoBadge);
+  const np = $('#form input[data-p="stream.nowPlayingUrl"]'); if (np) warnNow(np);
 }
 function fieldsHtml(fields, base) { return fields.map((f) => f.row ? `<div class="grid2">${fieldsHtml(f.row, base)}</div>` : fieldHtml(f, join(base, f.k))).join(""); }
 let uid = 0;
@@ -484,6 +485,7 @@ form.addEventListener("input", (e) => {
   if (el.type === "color" || (el.closest(".color-row") && el.type === "text")) el.closest(".color-row").querySelectorAll("input").forEach((x) => x !== el && (x.value = v));
   const th = form.querySelector(`[data-thumb="${CSS.escape(p)}"]`); if (th) setThumb(th, v);
   if (el.matches("[data-video-check]")) updateVideoBadge(el);
+  if (p === "stream.nowPlayingUrl") warnNow(el);
   const item = el.closest("[data-item]"); if (item) refreshHead(item);
 });
 form.addEventListener("change", (e) => {
@@ -514,10 +516,18 @@ function setThumb(th, v) { th.style.backgroundImage = v ? `url('${v}')` : ""; th
 function parseVideo(u) {
   u = String(u || "").trim(); if (!u) return null;
   let m = u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/); if (m) return { type: "YouTube", thumb: `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg` };
+  if (/kick\.com\/(?!video\/)[\w-]+/i.test(u)) return { type: "Kick en vivo", live: true };
+  if (/twitch\.tv\/[\w-]+/i.test(u)) return { type: "Twitch en vivo", live: true };
   if (/vimeo\.com\/(?:video\/)?\d+/.test(u)) return { type: "Vimeo" };
   if (/\.(mp4|webm|mov)(\?|$)/i.test(u)) return { type: "Archivo MP4" };
   if (/^https?:\/\//.test(u)) return { type: "Enlace externo" };
   return { type: "Link no válido", bad: true };
+}
+function warnNow(el) {
+  let w = el.parentElement.querySelector("[data-warn]");
+  if (!w) { w = document.createElement("span"); w.dataset.warn = ""; el.after(w); }
+  const bad = /kick\.com|youtube\.com|youtu\.be|twitch\.tv|facebook\.com|instagram\.com/i.test(el.value);
+  w.className = bad ? "badge bad" : ""; w.textContent = bad ? "✕ Este campo no es para links de Kick/YouTube. Déjalo vacío." : "";
 }
 function updateVideoBadge(el) {
   const b = el.parentElement.querySelector("[data-badge]"); const v = parseVideo(el.value);
@@ -525,6 +535,8 @@ function updateVideoBadge(el) {
 }
 function testAudio(url, badge) {
   if (!url) { badge.textContent = "Escribe el link primero"; badge.className = "badge bad"; return; }
+  const pv = parseVideo(url);
+  if (pv && (pv.live || pv.type === "YouTube")) { badge.textContent = `✓ ${pv.live ? pv.type : "YouTube"}: se verá en una ventanita de video al tocar play`; badge.className = "badge ok"; return; }
   badge.textContent = "Conectando…"; badge.className = "badge";
   const a = new Audio(); let done = false;
   const fin = (ok, msg) => { if (done) return; done = true; a.pause(); a.src = ""; badge.textContent = msg; badge.className = "badge " + (ok ? "ok" : "bad"); };
